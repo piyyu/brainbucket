@@ -6,6 +6,12 @@ const contentSchema = new Schema({
     description: { type: String },
     tags: [{ type: mongoose.Types.ObjectId, ref: "Tag" }],
     userId: { type: mongoose.Types.ObjectId, ref: "User", required: true },
+
+    embedding: {
+        type: [Number],
+        default: []
+    }
+
 });
 
 
