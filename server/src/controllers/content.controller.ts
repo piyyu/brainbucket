@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import Content from "../models/content.model";
 import { generateEmbedding } from "../utils/embedding.js";
+import { askGroq } from "../utils/groq";
+import Groq from "groq-sdk";
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
 
 function cosineSimilarity(a: number[], b: number[]): number {
   let dot = 0, magA = 0, magB = 0;
@@ -13,6 +18,21 @@ function cosineSimilarity(a: number[], b: number[]): number {
 
   const denom = Math.sqrt(magA) * Math.sqrt(magB);
   return denom === 0 ? 0 : dot / denom;
+}
+
+async function retrieveRelevantContent(userId: string, queryEmbedding: number[]) {
+  const allContents = await Content.find({ userId });
+
+  const valid = allContents.filter(
+    (c) => Array.isArray(c.embedding) && c.embedding.length > 0
+  );
+
+  return valid
+    .map((c) => ({
+      content: c,
+      similarity: cosineSimilarity(queryEmbedding, c.embedding as number[]),
+    }))
+    .sort((a, b) => b.similarity - a.similarity);
 }
 
 const createContent = async (req: Request, res: Response) => {
@@ -29,7 +49,7 @@ const createContent = async (req: Request, res: Response) => {
       embedding,
       // @ts-ignore
       userId: req.userId,
-      tags: []
+      tags: [],
     });
 
     res.json({
@@ -39,20 +59,56 @@ const createContent = async (req: Request, res: Response) => {
         title: newContent.title,
         link: newContent.link,
         description: newContent.description,
-        tags: newContent.tags
-      }
+        tags: newContent.tags,
+      },
     });
-
   } catch (error) {
-    console.error(error);
+    console.error("Create error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
 
-const MIN_SIMILARITY = 0.55; // adjust based on testing
+const MIN_SIMILARITY = 0.35;
 
 const searchContent = async (req: Request, res: Response) => {
+  const { query } = req.body;
+
+  if (!query?.trim()) {
+    return res.status(400).json({ error: "Query cannot be empty" });
+  }
+
+  try {
+    const queryEmbedding = await generateEmbedding(query);
+    // @ts-ignore
+    const userId = req.userId;
+
+    const scored = await retrieveRelevantContent(userId, queryEmbedding);
+
+    const filtered = scored
+      .filter((s) => s.similarity >= MIN_SIMILARITY)
+      .slice(0, 5);
+
+    res.json({
+      message: "Search results",
+      results: filtered.map((s) => ({
+        _id: s.content._id,
+        title: s.content.title,
+        description: s.content.description,
+        link: s.content.link,
+        tags: s.content.tags,
+        similarity: s.similarity,
+      })),
+    });
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const MIN_RELEVANCE = 0.40;
+
+const askEcho = async (req: Request, res: Response) => {
   const { query } = req.body;
 
   if (!query?.trim()) {
@@ -64,35 +120,34 @@ const searchContent = async (req: Request, res: Response) => {
 
     // @ts-ignore
     const userId = req.userId;
-    const allContents = await Content.find({ userId });
 
-    const validContents = allContents.filter(
-      (c) => Array.isArray(c.embedding) && c.embedding.length > 0
-    );
+    const scored = await retrieveRelevantContent(userId, queryEmbedding);
 
-    const scored = validContents.map((c) => ({
-      item: {
-        _id: c._id,
-        title: c.title,
-        description: c.description,
-        link: c.link,
-        tags: c.tags,
-      },
-      similarity: cosineSimilarity(queryEmbedding, c.embedding as number[]),
-    }));
+    let context = "";
+    let sources: any[] = [];
 
-    const filtered = scored
-      .sort((a, b) => b.similarity - a.similarity)
-      .filter((s) => s.similarity >= MIN_SIMILARITY)
-      .slice(0, 5);
+    if (scored.length && scored[0].similarity >= MIN_RELEVANCE) {
+      const topNotes = scored.slice(0, 3);
+      context = topNotes
+        .map(s =>
+          `Title: ${s.content.title}\nDescription: ${s.content.description}`
+        )
+        .join("\n\n---\n\n");
 
-    res.json({
-      message: "Search results",
-      results: filtered,
-    });
+      sources = topNotes.map(s => ({
+        id: s.content._id,
+        title: s.content.title,
+        similarity: s.similarity
+      }));
+    }
+
+    const answer = await askGroq(query, context);
+
+    return res.json({ answer, sources });
+
   } catch (error) {
-    console.error("Search error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Ask error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -105,16 +160,16 @@ const getContent = async (req: Request, res: Response) => {
 
     res.json({
       message: "Contents retrieved successfully",
-      contents: contents.map(c => ({
+      contents: contents.map((c) => ({
         _id: c._id,
         title: c.title,
         link: c.link,
         description: c.description,
-        tags: c.tags
-      }))
+        tags: c.tags,
+      })),
     });
-
   } catch (error) {
+    console.error("Get content error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -128,14 +183,20 @@ const deleteContent = async (req: Request, res: Response) => {
 
     await Content.findOneAndDelete({
       _id: contentId,
-      userId
+      userId,
     });
 
     res.json({ message: "Content deleted successfully" });
-
   } catch (error) {
+    console.error("Delete error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-export { createContent, getContent, deleteContent, searchContent };
+export {
+  createContent,
+  searchContent,
+  askEcho,
+  getContent,
+  deleteContent,
+};
