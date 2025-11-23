@@ -10,6 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import { AddBucket } from "./AddBucket";
 
 interface NavProps {
     variant?: "landing" | "dashboard";
@@ -19,7 +20,7 @@ const NAV_VARIANTS = {
     landing:
         "fixed top-4 left-1/2 -translate-x-1/2 w-[90%] max-w-6xl backdrop-blur-md bg-[#090b0e]/30 border border-white/10 rounded-xl shadow-lg text-white z-10 hover:shadow-[0_0_25px_rgba(255,255,255,0.15)]",
     dashboard:
-        "w-full backdrop-blur-md bg-[#090b0e]/50 border-b border-white/10 text-white fixed top-0 left-0 z-10",
+        "w-full backdrop-blur-md bg-[#090b0e]/50 border-b border-white/10 text-white px-10 py-3 fixed top-0 left-0 z-10",
 };
 
 export const Nav = ({ variant }: NavProps) => {
@@ -83,21 +84,18 @@ const NavDashboard = () => {
 
 
                 <div className="flex items-center gap-3">
-                    <Button className="flex gap-2 bg-white text-black hover:bg-gray-300">
-                        <Plus className="h-4 w-4" />
-                        add bucket
-                    </Button>
+                    <AddBucket />            
 
-                    <Button variant="default" size="icon" className="bg-[#0f1012]">
+                    <Button variant="default" size="icon" className="bg-[#0f1012] text-white hover:bg-white/10">
                         <BookMarked className="h-5 w-5" />
                     </Button>
 
-                    <Button variant="default" size="icon" className="bg-[#0f1012]">
+                    <Button variant="default" size="icon" className="bg-[#0f1012] text-white hover:bg-white/10">
                         <History className="h-5 w-5" />
                     </Button>
 
                     <UserDropdown>
-                        <User className="h-5 w-5" />
+                            <User className="h-5 w-5 text-white" />
                     </UserDropdown>
                 </div>
             </div>

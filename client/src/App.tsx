@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner"
 import Landing from "./pages/Landing";
 import { Home } from "./pages/Home";
 import { Auth } from "./pages/Auth";
@@ -17,6 +18,8 @@ function App() {
         } />
         <Route path="/auth" element={<Auth />} />
       </Routes>
+
+      <Toaster />
     </BrowserRouter>
   );
 }

@@ -58,12 +58,12 @@ export function Auth() {
   return (
     <div className="relative min-h-screen flex items-center justify-around bg-[#0f1012] overflow-hidden">
 
-      <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-6 w-1/2">
         <Logo width={96} height={96} />
         <div className="text-white text-9xl font-bold">brainbucket.</div>
       </div>
 
-      <div>
+      <div className="">
         <Card className="relative z-10 w-full max-w-sm bg-[#1e2024] border border-white/10 shadow-xl backdrop-blur-md">
           <CardHeader className="text-center">
             <CardTitle className="text-white">
