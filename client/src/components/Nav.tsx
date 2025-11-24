@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Logo } from "./icons/Logo";
-import { Plus, BookMarked, History, User, ArrowRight } from "lucide-react";
+import {History, User, ArrowRight } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,17 +11,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { AddBucket } from "./AddBucket";
+import { Buckets } from "./Buckets";
 
 interface NavProps {
     variant?: "landing" | "dashboard";
 }
 
 const NAV_VARIANTS = {
-    landing:
-        "fixed top-4 left-1/2 -translate-x-1/2 w-[90%] max-w-6xl backdrop-blur-md bg-[#090b0e]/30 border border-white/10 rounded-xl shadow-lg text-white z-10 hover:shadow-[0_0_25px_rgba(255,255,255,0.15)]",
-    dashboard:
-        "w-full backdrop-blur-md bg-[#090b0e]/50 border-b border-white/10 text-white px-10 py-3 fixed top-0 left-0 z-10",
-};
+  landing:
+    "fixed top-4 left-1/2 -translate-x-1/2 w-[90%] max-w-6xl backdrop-blur-md bg-[#090b0e]/30 border border-white/10 rounded-xl shadow-lg text-white z-10 hover:shadow-[0_0_25px_rgba(255,255,255,0.15)]",
+  dashboard:
+    "w-full backdrop-blur-md bg-[#090b0e]/50 border-b border-white/10 text-white fixed top-0 left-0 z-10",
+}
+
 
 export const Nav = ({ variant }: NavProps) => {
     return (
@@ -33,48 +35,43 @@ export const Nav = ({ variant }: NavProps) => {
 
 
 const NavLanding = () => {
-    const navigate = useNavigate();
-    const auth = () => navigate("/auth");
+  const navigate = useNavigate();
+  const auth = () => navigate("/auth");
 
-    return (
-        <nav className={NAV_VARIANTS["landing"]}>
-            <div className="flex items-center justify-between py-4 px-6">
+  return (
+    <nav className={NAV_VARIANTS.landing}>
+      <div className="flex items-center justify-between px-6 py-6">
+        <div className="flex items-center gap-3">
+          <Logo height={36} width={36} />
+          <div className="text-2xl font-semibold tracking-tight">
+            brainbucket.
+          </div>
+        </div>
 
-                <div className="flex items-center gap-3">
-                    <Logo height={36} width={36} />
-                    <div className="text-2xl font-semibold tracking-tight">
-                        brainbucket.
-                    </div>
-                </div>
+        <div className="hidden md:flex items-center gap-10 text-md text-white/80">
+          <button className="hover:text-white transition">features</button>
+          <button className="hover:text-white transition">pricing</button>
+          <button className="hover:text-white transition">showcase</button>
+          <button className="hover:text-white transition">docs</button>
+        </div>
 
-                <div className="hidden md:flex items-center gap-10 text-md text-white/80">
-                    <button className="hover:text-white transition">features</button>
-                    <button className="hover:text-white transition">pricing</button>
-                    <button className="hover:text-white transition">showcase</button>
-                    <button className="hover:text-white transition">docs</button>
-                </div>
-
-                <div className="flex items-center gap-3" onClick={auth}>
-                    <Button
-                        variant="ghost"
-                        className="flex items-center gap-2 bg-black text-white px-8 py-6 rounded-xl transition duration-200"
-                    >
-                        try for free
-                        <ArrowRight className="h-4 w-4" />
-                    </Button>
-
-
-                </div>
-
-            </div>
-        </nav>
-    );
+        <Button
+          onClick={auth}
+          variant="default"
+        >
+          try for free
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </nav>
+  );
 };
+
 
 const NavDashboard = () => {
     return (
         <nav className={NAV_VARIANTS["dashboard"]}>
-            <div className="flex items-center justify-between py-4 px-6">
+            <div className="flex items-center justify-between px-6 py-6 mx-auto ml-10 mr-10">
                 <div className="flex items-center gap-3">
                     <Logo width={36} height={36} />
                     <div className="text-2xl font-semibold tracking-tight">
@@ -82,13 +79,12 @@ const NavDashboard = () => {
                     </div>
                 </div>
 
-
                 <div className="flex items-center gap-3">
-                    <AddBucket />            
+                    <AddBucket />    
 
-                    <Button variant="default" size="icon" className="bg-[#0f1012] text-white hover:bg-white/10">
-                        <BookMarked className="h-5 w-5" />
-                    </Button>
+                    <Buckets />        
+
+                    
 
                     <Button variant="default" size="icon" className="bg-[#0f1012] text-white hover:bg-white/10">
                         <History className="h-5 w-5" />

@@ -5,7 +5,7 @@ import { userMiddleware } from "../middleware/middleware.js";
 const router = Router();
 
 router.post("/bucket/create", userMiddleware, createContent);
-router.get("/bucket/get", userMiddleware, getContent);
+router.get("/buckets/list", userMiddleware, getContent);
 router.delete("/bucket/delete", userMiddleware, deleteContent);
 router.post("/search", userMiddleware, searchContent);
 router.post("/ask", userMiddleware, askEcho);
