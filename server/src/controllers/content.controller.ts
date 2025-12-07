@@ -4,9 +4,6 @@ import { generateEmbedding } from "../utils/embedding.js";
 import { askGroq } from "../utils/groq";
 import Groq from "groq-sdk";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-
 function cosineSimilarity(a: number[], b: number[]): number {
   let dot = 0, magA = 0, magB = 0;
 
@@ -106,44 +103,75 @@ const searchContent = async (req: Request, res: Response) => {
   }
 };
 
-const MIN_RELEVANCE = 0.40;
+const MIN_RELEVANCE = 0.25;
+const userChats: Record<string, { role: "user" | "assistant"; content: string }[]> = {};
 
 const askEcho = async (req: Request, res: Response) => {
   const { query } = req.body;
+  // @ts-ignore
+  const userId = req.userId;
 
   if (!query?.trim()) {
     return res.status(400).json({ error: "Query cannot be empty" });
   }
 
   try {
+    if (!userChats[userId]) userChats[userId] = [];
+
+    userChats[userId].push({
+      role: "user",
+      content: query,
+    });
+
+    const chatHistory = userChats[userId]
+      .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
+      .join("\n");
+
     const queryEmbedding = await generateEmbedding(query);
-
-    // @ts-ignore
-    const userId = req.userId;
-
     const scored = await retrieveRelevantContent(userId, queryEmbedding);
 
-    let context = "";
+    let ragContext = "";
     let sources: any[] = [];
 
     if (scored.length && scored[0].similarity >= MIN_RELEVANCE) {
       const topNotes = scored.slice(0, 3);
-      context = topNotes
-        .map(s =>
-          `Title: ${s.content.title}\nDescription: ${s.content.description}`
-        )
+      ragContext = topNotes
+        .map(s => `Title: ${s.content.title}\nDescription: ${s.content.description}`)
         .join("\n\n---\n\n");
 
       sources = topNotes.map(s => ({
         id: s.content._id,
         title: s.content.title,
-        similarity: s.similarity
+        similarity: s.similarity,
       }));
     }
 
-    const answer = await askGroq(query, context);
+    const finalPrompt = `
+Conversation so far:
+${chatHistory}
 
-    return res.json({ answer, sources });
+User’s new message:
+${query}
+
+Respond naturally, continuing the conversation.
+    `;
+
+    const messages = [
+      { role: "user", content: finalPrompt }
+    ];
+
+    const answer = await askGroq(messages, ragContext);
+
+    userChats[userId].push({
+      role: "assistant",
+      content: answer,
+    });
+
+    return res.json({
+      answer,
+      sources,
+      history: userChats[userId],
+    });
 
   } catch (error) {
     console.error("Ask error:", error);

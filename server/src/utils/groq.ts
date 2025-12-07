@@ -4,40 +4,37 @@ export const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-export async function askGroq(prompt: string, context: string) {
+export async function askGroq(messages: any[], context: string) {
   const completion = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
+
     messages: [
       {
         role: "system",
-        content:
-`SMART MODE:
-You are Echo, the user's intelligent second brain.
+        content: `
+You are Echo — a helpful, friendly personal AI assistant.
 
-You behave like a normal AI assistant.
+You chat naturally like a normal AI, but you also have access to the user's saved notes (Memory Notes).
 
-Memory rules:
-- If memory is highly relevant, use it naturally in the answer.
-- If memory is partially relevant, mention what the note contains and clarify what is missing.
-- If memory is unrelated, ignore it entirely.
-- NEVER say "I don't know yet" in smart mode.
-- NEVER ignore a partially relevant note.
-- NEVER guess missing information.
+If the Memory Notes are relevant to the user's message:
+- Use them naturally in your answer.
+- Do NOT sound forced.
+- Do NOT list them unless needed.
+- Simply integrate the info into your explanation.
 
-You may use general knowledge freely.
-Be friendly, clear, and conversational.
-`
+If they are not relevant, ignore them.
+        `.trim()
       },
+
       {
         role: "system",
-        content: `Memory Notes:\n${context}`
+        content: `Memory Notes:\n${context || "None"}`
       },
-      {
-        role: "user",
-        content: prompt
-      }
+
+      ...messages
     ],
-    temperature: 0.4
+
+    temperature: 0.5,
   });
 
   return completion.choices[0]?.message?.content || "";
