@@ -73,7 +73,7 @@ const NavLanding = () => {
 const NavDashboard = () => {
     return (
         <nav className={NAV_VARIANTS["dashboard"]}>
-            <div className="flex items-center justify-between px-6 py-6 mx-auto ml-10 mr-10">
+            <div className="flex items-center justify-between px-4 py-3 mx-auto ml-10 mr-10">
                 <div className="flex items-center gap-3">
                     <Logo width={36} height={36} />
                     <div className="text-2xl font-semibold tracking-tight">

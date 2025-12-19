@@ -27,11 +27,10 @@ export const Hero = () => {
         </div>
 
         <div className="flex flex-col items-center flex-1 space-y-5 my-54">
-          <div className="text-6xl font-bold text-white drop-shadow-lg">your second brain ai <br />assistant</div>
+          <div className="text-6xl font-medium text-white drop-shadow-lg">your second brain ai <br />assistant</div>
           <p>save thoughts, organize ideas, and boost productivity.</p>
           <ButtonL variant="primary" size="small" onClick={auth}>
             sign up
-            <ArrowRight className="h-4 w-4" />
           </ButtonL>
         </div>
       </div>
