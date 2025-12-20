@@ -1,8 +1,6 @@
-interface ButtonProps {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary";
   size?: "small" | "medium" | "large";
-  onClick?: () => void;
-  children: React.ReactNode;
 }
 
 const variants = {
@@ -14,6 +12,7 @@ const variants = {
     active:shadow-[0_10px_22px_rgba(0,0,0,0.22),inset_0_-2px_4px_rgba(236,72,153,0.45)]
     active:scale-[0.97]
     hover:scale-[1.02]
+    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none
   `,
   secondary: `
     bg-black text-white font-medium rounded-lg
@@ -22,6 +21,7 @@ const variants = {
     hover:bg-zinc-800
     active:scale-[0.97]
     hover:scale-[1.02]
+    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
   `,
 };
 
@@ -34,17 +34,19 @@ const sizes = {
 export default function ButtonL({
   variant = "primary",
   size = "medium",
-  onClick,
+  className,
   children,
+  ...props
 }: ButtonProps) {
   return (
     <button
-      onClick={onClick}
       className={`
         ${variants[variant]}
         ${sizes[size]}
         inline-flex items-center gap-2 whitespace-nowrap
+        ${className || ""}
       `}
+      {...props}
     >
       {children}
     </button>

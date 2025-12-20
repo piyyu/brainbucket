@@ -1,9 +1,13 @@
 import { Nav } from "@/components/Nav";
-import {Chat} from "../components/Chat";
+import { Chat } from "../components/Chat";
 
 export const Home = () => {
-  return <div className="bg-[#0f1012] text-white h-screen pt-16 flex flex-col items-center">
-    <Nav variant="dashboard" />
-    <Chat />
-  </div>;
+  return (
+    <div className="bg-[#0f1012] text-white h-[100dvh] w-full relative overflow-hidden">
+      <Nav variant="dashboard" />
+      <div className="absolute inset-0 top-20 w-full">
+        <Chat />
+      </div>
+    </div>
+  );
 }

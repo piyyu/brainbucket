@@ -41,7 +41,11 @@ export function Buckets() {
       open && fetchBuckets();
     }}>
       <DialogTrigger className="p-2 rounded">
-        <Button variant="default" size="icon" className="bg-[#0f1012] text-white hover:bg-white/10">
+        <Button
+          variant="default"
+          size="icon"
+          className="bg-black text-white font-medium rounded-lg shadow-[0_10px_24px_rgba(0,0,0,0.35),inset_0_-3px_6px_rgba(236,72,153,0.55)] transition-all duration-200 ease-out hover:bg-zinc-800 active:scale-[0.97] hover:scale-[1.02]"
+        >
           <BookMarked className="h-5 w-5" />
         </Button>
       </DialogTrigger>

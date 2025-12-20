@@ -1,36 +1,50 @@
 import FeatureCard from "./FeatureCard";
+import CaptureIllustration from "./illustrations/CaptureIllustration";
+import ConnectIllustration from "./illustrations/ConnectIllustration";
+import SearchIllustration from "./illustrations/SearchIllustration";
+import RecallIllustration from "./illustrations/RecallIllustration";
 
 export default function Features() {
   return (
-    <section className="py-24 px-6 md:px-12 lg:px-24 bg-[#04040e] h-screen flex items-center">
-      <div className="max-w-6xl mx-auto">
+    <section className="py-20 md:py-24 px-4 bg-[#04040e] flex flex-col justify-center h-screen">
+      <div className="max-w-4xl mx-auto w-full flex flex-col items-center justify-center gap-10 sm:gap-8">
 
-        <div className="mb-16 text-center text-white">
-          <h2 className="text-4xl md:text-5xl font-light">
+        <div className="text-center text-white mt-20">
+          <h2 className="text-2xl md:text-4xl font-light tracking-tight">
             give your memory superpowers
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 auto-rows-[minmax(140px,auto)]">
           <FeatureCard
             title="capture anything"
             description="save thoughts, links, and ideas instantly without breaking your flow."
-          />
+            className="md:col-span-2"
+          >
+            <CaptureIllustration />
+          </FeatureCard>
 
           <FeatureCard
             title="connect knowledge"
             description="ideas naturally link together as your knowledge grows."
-          />
+          >
+            <ConnectIllustration />
+          </FeatureCard>
 
           <FeatureCard
             title="semantic search"
             description="find what you need by meaning, not keywords."
-          />
+          >
+            <SearchIllustration />
+          </FeatureCard>
 
           <FeatureCard
             title="recall on demand"
             description="ask questions and get answers from your own notes."
-          />
+            className="md:col-span-2"
+          >
+            <RecallIllustration />
+          </FeatureCard>
         </div>
 
       </div>
