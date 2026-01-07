@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router";
-import bg from "./../assets/bg.png";
 import ButtonL from "./ButtonL";
 
 export const Hero = () => {
@@ -11,7 +10,6 @@ export const Hero = () => {
       <div
         className="absolute inset-0 bg-cover bg-no-repeat"
         style={{
-          backgroundImage: `url(${bg})`,
           backgroundPosition: "bottom center",
         }}
       />

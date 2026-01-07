@@ -6,8 +6,8 @@ import RecallIllustration from "./illustrations/RecallIllustration";
 
 export default function Features() {
   return (
-    <section className="py-20 md:py-24 px-4 bg-[#04040e] flex flex-col justify-center h-screen">
-      <div className="max-w-4xl mx-auto w-full flex flex-col items-center justify-center gap-10 sm:gap-8">
+    <section className="py-20 md:py-24 px-4 flex flex-col justify-center h-screen">
+      <div className="max-w-5xl mx-auto w-full flex flex-col items-center justify-center gap-10 sm:gap-8">
 
         <div className="text-center text-white mt-20">
           <h2 className="text-2xl md:text-4xl font-light tracking-tight">

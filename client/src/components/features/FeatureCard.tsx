@@ -27,12 +27,12 @@ export default function FeatureCard({
         "group",
         "flex gap-2",
         isWide
-          ? "flex-col md:flex-row md:items-center p-3"
-          : "flex-col p-3",
+          ? "flex-col md:flex-row md:items-center p-4"
+          : "flex-col p-4",
         className
       )}
     >
-      
+
       <div
         className={cn(
           "flex flex-col gap-0.5",
