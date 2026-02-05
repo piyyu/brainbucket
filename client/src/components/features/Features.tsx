@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Brain, Network, Search, Database, Disc, Settings } from "lucide-react";
+import { Network, Search, Database, Disc, Settings } from "lucide-react";
 
 const features = [
   {

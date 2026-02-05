@@ -1,28 +1,10 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogIn, Menu, X, Terminal, Cpu, Zap, Layers, History, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { LogIn, Menu, X, Cpu, Zap, Layers } from "lucide-react";
 import { Logo } from "./icons/Logo";
-import { AddBucket } from "./AddBucket";
-import { Buckets } from "./Buckets";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
-interface NavProps {
-    variant?: "landing" | "dashboard";
-}
-
-export const Nav = ({ variant }: NavProps) => {
-    // Only verify if strictly needed, but for now assuming Nav is only for Landing page or explicitly called for it.
-    // If variant is dashboard, we might render nothing or redirect?
-    // Usage in Landing.tsx is <Nav variant="landing" />.
+export const Nav = () => {
     return (
         <NavLanding />
     );
@@ -117,77 +99,5 @@ const NavLanding = () => {
         </nav>
     );
 };
-
-const NavDashboard = () => {
-    return (
-        <nav className="w-full backdrop-blur-md bg-[#090b0e]/50 border-b border-white/10 text-white fixed top-0 left-0 z-10">
-            <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Logo width={36} height={36} />
-                    <div className="text-2xl font-semibold tracking-tight">
-                        brainbucket.
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <AddBucket />
-
-                    <Buckets />
-
-                    <Button
-                        variant="default"
-                        size="icon"
-                        className="bg-black text-white font-medium rounded-lg shadow-[0_10px_24px_rgba(0,0,0,0.35),inset_0_-3px_6px_rgba(236,72,153,0.55)] transition-all duration-200 ease-out hover:bg-zinc-800 active:scale-[0.97] hover:scale-[1.02]"
-                    >
-                        <History className="h-5 w-5" />
-                    </Button>
-
-                    <UserDropdown>
-                        <User className="h-5 w-5 text-white" />
-                    </UserDropdown>
-                </div>
-            </div>
-        </nav>
-    );
-}
-
-const UserDropdown = ({ children }: { children: React.ReactNode }) => {
-    const navigate = useNavigate();
-
-    const Logout = () => {
-        localStorage.removeItem("token");
-        navigate("/auth");
-    }
-
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant="default"
-                    size="icon"
-                    className="rounded-lg bg-black text-white font-medium shadow-[0_10px_24px_rgba(0,0,0,0.35),inset_0_-3px_6px_rgba(236,72,153,0.55)] transition-all duration-200 ease-out hover:bg-zinc-800 active:scale-[0.97] hover:scale-[1.02]"
-                >
-                    {children}
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Billing</DropdownMenuItem>
-                <DropdownMenuItem>Team</DropdownMenuItem>
-                <DropdownMenuItem
-                    onClick={Logout}
-                    className="text-red-600 hover:bg-red-600 hover:text-white
-             data-[highlighted]:bg-red-600 data-[highlighted]:text-white
-             cursor-pointer"
-                >
-                    Logout
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-
-    );
-}
 
 export default Nav;
