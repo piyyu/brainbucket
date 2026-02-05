@@ -7,7 +7,7 @@ import { System } from "../components/System";
 export default function Landing() {
   return (
     <div className="bg-black min-h-screen selection:bg-primary selection:text-black">
-      <Nav variant="landing" />
+      <Nav />
       <main>
         <Hero />
         <Features />
