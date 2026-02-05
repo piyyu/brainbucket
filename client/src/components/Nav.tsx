@@ -1,7 +1,11 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { LogIn, Menu, X, Terminal, Cpu, Zap, Layers, History, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ButtonL from "./ButtonL"
 import { Logo } from "./icons/Logo";
-import { History, User, ArrowRight } from "lucide-react";
+import { AddBucket } from "./AddBucket";
+import { Buckets } from "./Buckets";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,69 +14,113 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useNavigate } from "react-router-dom";
-import { AddBucket } from "./AddBucket";
-import { Buckets } from "./Buckets";
 
 interface NavProps {
     variant?: "landing" | "dashboard";
 }
 
-const NAV_VARIANTS = {
-    landing:
-        "fixed top-4 left-1/2 -translate-x-1/2 w-[90%] md:w-[70%] max-w-6xl border border-white/5 rounded-xl shadow-lg shadow-[0_8px_30px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.04)] bg-white/5 text-white z-50",
-    dashboard:
-        "w-full backdrop-blur-md bg-[#090b0e]/50 border-b border-white/10 text-white fixed top-0 left-0 z-10",
-}
-
-
 export const Nav = ({ variant }: NavProps) => {
+    // Only verify if strictly needed, but for now assuming Nav is only for Landing page or explicitly called for it.
+    // If variant is dashboard, we might render nothing or redirect?
+    // Usage in Landing.tsx is <Nav variant="landing" />.
     return (
-        <>
-            {variant === "landing" ? <NavLanding /> : <NavDashboard />}
-        </>
+        <NavLanding />
     );
 };
 
-
 const NavLanding = () => {
-    const navigate = useNavigate();
-    const auth = () => navigate("/auth");
+    const [isOpen, setIsOpen] = useState(false);
+    const navItems = [
+        { name: "FEATURES", icon: Cpu },
+        { name: "PRICING", icon: Zap },
+        { name: "SYSTEM", icon: Layers },
+    ];
 
     return (
-        <nav className={NAV_VARIANTS.landing}>
-            <div className="flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-3">
-                    <Logo height={36} width={36} />
-                    <div className="text-2xl font-semibold tracking-tight">
-                        brainbucket.
+        <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl">
+            <div className="relative bg-[#1a1a1a] border border-[#333] px-1 py-1 flex items-center justify-between shadow-2xl rounded-sm">
+
+                {/* Inner Bevel Container */}
+                <div className="absolute inset-0 border-bevel pointer-events-none rounded-sm" />
+
+                <div className="flex items-center justify-between w-full px-5 py-2 bg-[#111] rounded-[1px]">
+                    {/* Logo Section */}
+                    <Link to="/" className="flex items-center gap-3 group">
+                        <div className="w-12 h-12 bg-[#151515] border border-[#333] flex items-center justify-center rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.5)] relative z-10">
+                            <Logo width={32} height={32} />
+                        </div>
+                        <span className="text-lg font-display font-medium tracking-widest text-white/90 text-etched">
+                            BRAINBUCKET
+                        </span>
+                    </Link>
+
+                    {/* Desktop Links */}
+                    <div className="hidden md:flex items-center gap-1">
+                        {navItems.map((item) => (
+                            <a
+                                key={item.name}
+                                href={`#${item.name.toLowerCase()}`}
+                                className="px-4 py-2 text-[10px] font-mono tracking-widest text-white/40 hover:text-white hover:bg-[#222] transition-colors uppercase rounded-sm"
+                            >
+                                {item.name}
+                            </a>
+                        ))}
+                    </div>
+
+                    {/* Auth Button & Menu Toggle */}
+                    <div className="flex items-center gap-4">
+                        {/* Login Button */}
+                        <Link to="/auth">
+                            <button className="hidden md:flex items-center gap-2 px-5 py-2 bg-[#e5e5e5] text-black font-mono text-xs uppercase tracking-wider hover:bg-white transition-colors border border-transparent hover:border-white/50 rounded-sm">
+                                <LogIn className="w-3 h-3" />
+                                Initialize
+                            </button>
+                        </Link>
+
+                        {/* Mobile Menu Toggle */}
+                        <button
+                            className="md:hidden text-white/70 hover:text-white"
+                            onClick={() => setIsOpen(!isOpen)}
+                        >
+                            {isOpen ? <X /> : <Menu />}
+                        </button>
                     </div>
                 </div>
-
-                <div className="hidden md:flex items-center gap-10 text-md text-white/80">
-                    <button className="hover:text-white transition cursor-pointer">features</button>
-                    <button className="hover:text-white transition cursor-pointer">pricing</button>
-                    <button className="hover:text-white transition cursor-pointer">showcase</button>
-                    <button className="hover:text-white transition cursor-pointer">docs</button>
-                </div>
-
-                <ButtonL
-                    onClick={auth}
-                    variant="primary"
-                    size="small"
-                >
-                    try for free
-                    <ArrowRight className="h-4 w-4" />
-                </ButtonL>
             </div>
+
+            {/* Mobile Menu */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute top-full mt-2 left-0 w-full bg-[#111] border border-[#333] shadow-2xl p-4 flex flex-col gap-2 md:hidden"
+                    >
+                        {navItems.map((item) => (
+                            <button
+                                key={item.name}
+                                className="flex items-center gap-3 text-white/60 hover:text-white hover:bg-[#222] transition-colors p-3 text-left font-mono text-sm uppercase rounded-sm"
+                            >
+                                <item.icon className="w-4 h-4" />
+                                {item.name}
+                            </button>
+                        ))}
+                        <Link to="/auth" className="w-full mt-2">
+                            <button className="w-full py-3 bg-[#e5e5e5] text-black font-mono text-xs uppercase tracking-wider hover:bg-white transition-colors rounded-sm">
+                                Initialize System
+                            </button>
+                        </Link>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </nav>
     );
 };
 
-
 const NavDashboard = () => {
     return (
-        <nav className={NAV_VARIANTS["dashboard"]}>
+        <nav className="w-full backdrop-blur-md bg-[#090b0e]/50 border-b border-white/10 text-white fixed top-0 left-0 z-10">
             <div className="container mx-auto px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Logo width={36} height={36} />
@@ -141,3 +189,5 @@ const UserDropdown = ({ children }: { children: React.ReactNode }) => {
 
     );
 }
+
+export default Nav;
