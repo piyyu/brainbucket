@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+const PORT = process.env.PORT || 3000;
 
 import express from "express";
 import connectDb from "./config/db";
@@ -17,6 +18,6 @@ connectDb();
 app.use("/api/v1/", authRoutes);
 app.use("/api/v1/", contentRoutes);
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
