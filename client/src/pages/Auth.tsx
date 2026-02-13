@@ -36,7 +36,7 @@ export function Auth() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post('http://localhost:3000/api/v1/login', {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/login`, {
         email,
         password
       })
@@ -52,7 +52,7 @@ export function Auth() {
 
   const handleRegister = async () => {
     try {
-      const res = await axios.post('http://localhost:3000/api/v1/register', {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/register`, {
         username,
         email,
         password

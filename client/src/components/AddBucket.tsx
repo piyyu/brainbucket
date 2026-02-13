@@ -101,7 +101,7 @@ export function AddBucket() {
     const saveBucket = async (e: React.MouseEvent) => {
         e.preventDefault();
         try {
-            await axios.post("http://localhost:3000/api/v1/bucket/create", {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/bucket/create`, {
                 title,
                 link,
                 description

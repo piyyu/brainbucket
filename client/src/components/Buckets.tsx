@@ -30,7 +30,7 @@ export function Buckets() {
 
   const fetchBuckets = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/v1/buckets/list", {
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/buckets/list`, {
         headers: {
           auth: localStorage.getItem("token") || ""
         }
