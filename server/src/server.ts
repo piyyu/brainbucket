@@ -8,10 +8,21 @@ import cors from "cors";
 
 import authRoutes from "./routes/auth.routes.js";
 import contentRoutes from "./routes/content.routes.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
+app.use(cookieParser());
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://brainbucket-zeta.vercel.app",
+    ],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 connectDb();
 
