@@ -5,7 +5,8 @@ import {
     Dialog,
     DialogContent,
 } from "@/components/ui/dialog"
-import { Bold, Italic, List, ListOrdered, Globe, X } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Bold, Italic, List, ListOrdered, Globe, X, Type, AlignLeft } from "lucide-react"
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -109,85 +110,140 @@ export function AddBucket({ open, onOpenChange }: { open: boolean; onOpenChange:
         }
     }
 
+    const [activeTab, setActiveTab] = useState("name");
+
+    const handleTabChange = (val: string) => setActiveTab(val);
+
     const canProceed = title.trim().length > 0;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[95vw] md:w-full md:max-w-[460px] bg-background border border-border/50 text-foreground p-0 overflow-hidden rounded-xl shadow-xl [&>button]:hidden">
+            <DialogContent className="w-[95vw] md:w-full md:max-w-[720px] bg-background border border-border/50 text-foreground p-0 overflow-hidden rounded-xl shadow-xl [&>button]:hidden">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-border/30 bg-muted/5">
-                    <h2 className="text-[15px] font-semibold text-foreground tracking-[-0.01em]">
-                        Create Bucket
-                    </h2>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-border/30 bg-muted/5">
+                    <div>
+                        <h2 className="text-[16px] font-semibold text-foreground tracking-[-0.01em]">
+                            Create Bucket
+                        </h2>
+                        <p className="text-[13px] text-muted-foreground mt-0.5">Add a new collection to your workspace.</p>
+                    </div>
                     <button
                         onClick={() => onOpenChange(false)}
-                        className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all cursor-pointer"
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all cursor-pointer"
                     >
                         <X className="w-4 h-4" strokeWidth={1.5} />
                     </button>
                 </div>
 
-                {/* Content */}
-                <div className="p-5 space-y-4">
-                    <div className="space-y-1.5">
-                        <label className="text-[12px] font-medium text-foreground/80">Name</label>
-                        <input
-                            autoFocus
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && canProceed && saveBucket()}
-                            placeholder="Project Ideas, Research..."
-                            className="w-full h-9 px-3 rounded-lg bg-background border border-border/50 text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/30 transition-all shadow-sm"
-                        />
+                {/* Tabs & Content */}
+                <Tabs value={activeTab} onValueChange={handleTabChange} className="flex h-[320px]">
+                    {/* Sidebar TabsList */}
+                    <div className="w-[180px] shrink-0 border-r border-border/30 bg-secondary/10 p-4">
+                        <TabsList className="flex flex-col h-auto bg-transparent p-0 gap-1 space-y-1">
+                            <TabsTrigger
+                                value="name"
+                                className="w-full justify-start px-3 py-2 h-9 text-[13px] data-[state=active]:bg-background data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/50 rounded-lg group"
+                            >
+                                <Type className="w-4 h-4 mr-2 text-indigo-400 opacity-70 group-data-[state=active]:opacity-100" strokeWidth={1.5} />
+                                Name
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="source"
+                                className="w-full justify-start px-3 py-2 h-9 text-[13px] data-[state=active]:bg-background data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/50 rounded-lg group"
+                            >
+                                <Globe className="w-4 h-4 mr-2 text-sky-400 opacity-70 group-data-[state=active]:opacity-100" strokeWidth={1.5} />
+                                Source Link
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="details"
+                                className="w-full justify-start px-3 py-2 h-9 text-[13px] data-[state=active]:bg-background data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/50 rounded-lg group"
+                            >
+                                <AlignLeft className="w-4 h-4 mr-2 text-emerald-400 opacity-70 group-data-[state=active]:opacity-100" strokeWidth={1.5} />
+                                Details
+                            </TabsTrigger>
+                        </TabsList>
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-[12px] font-medium text-foreground/80 flex items-center justify-between">
-                            Source Link <span className="text-[11px] text-muted-foreground/50 font-normal">Optional</span>
-                        </label>
-                        <div className="relative">
-                            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40" strokeWidth={1.5} />
+                    {/* Tab Panels */}
+                    <div className="flex-1 p-6 overflow-y-auto bg-background/50">
+                        <TabsContent value="name" className="mt-0 h-full flex flex-col justify-center space-y-4 focus-visible:outline-none">
+                            <div>
+                                <h3 className="text-[15px] font-medium text-foreground mb-1.5">What is this bucket about?</h3>
+                                <p className="text-[13px] text-muted-foreground">Give your new collection a clear, memorable name.</p>
+                            </div>
                             <input
-                                value={link}
-                                onChange={(e) => setLink(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && canProceed && saveBucket()}
-                                placeholder="https://..."
-                                className="w-full h-9 pl-9 pr-3 rounded-lg bg-background border border-border/50 text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/30 transition-all shadow-sm"
+                                autoFocus
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && canProceed && handleTabChange("source")}
+                                placeholder="E.g., Project Ideas, Research Logs..."
+                                className="w-full h-10 px-3 rounded-lg bg-background border border-border/50 text-[14px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/30 transition-all shadow-sm"
                             />
-                        </div>
-                    </div>
+                        </TabsContent>
 
-                    <div className="space-y-1.5">
-                        <label className="text-[12px] font-medium text-foreground/80 flex items-center justify-between">
-                            Details <span className="text-[11px] text-muted-foreground/50 font-normal">Optional</span>
-                        </label>
-                        <RichTextEditor content={description} onChange={setDescription} />
+                        <TabsContent value="source" className="mt-0 h-full flex flex-col justify-center space-y-4 focus-visible:outline-none">
+                            <div>
+                                <h3 className="text-[15px] font-medium text-foreground flex items-center gap-2 mb-1.5">
+                                    Add a source link <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-secondary/50 text-muted-foreground border border-border/30">Optional</span>
+                                </h3>
+                                <p className="text-[13px] text-muted-foreground">Attach a primary URL or website to this bucket.</p>
+                            </div>
+                            <div className="relative">
+                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" strokeWidth={1.5} />
+                                <input
+                                    value={link}
+                                    onChange={(e) => setLink(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleTabChange("details")}
+                                    placeholder="https://"
+                                    className="w-full h-10 pl-9 pr-3 rounded-lg bg-background border border-border/50 text-[14px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500/30 transition-all shadow-sm"
+                                />
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="details" className="mt-0 h-full flex flex-col space-y-4 focus-visible:outline-none">
+                            <div>
+                                <h3 className="text-[15px] font-medium text-foreground flex items-center gap-2 mb-1.5">
+                                    Add details <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-secondary/50 text-muted-foreground border border-border/30">Optional</span>
+                                </h3>
+                                <p className="text-[13px] text-muted-foreground">Jot down notes, context, or any other thoughts.</p>
+                            </div>
+                            <div className="flex-1 min-h-0">
+                                <RichTextEditor content={description} onChange={setDescription} />
+                            </div>
+                        </TabsContent>
                     </div>
-                </div>
+                </Tabs>
 
                 {/* Footer */}
-                <div className="px-5 py-4 border-t border-border/30 flex items-center justify-end gap-2 bg-muted/10">
-                    <button
-                        onClick={() => onOpenChange(false)}
-                        className="px-3.5 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-accent/50 transition-all cursor-pointer"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={saveBucket}
-                        disabled={!canProceed || saving}
-                        className="rounded-lg font-medium px-4 text-[13px] h-8 cursor-pointer bg-foreground text-background hover:bg-foreground/90 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm hover:-translate-y-px flex items-center gap-2"
-                    >
-                        {saving ? (
-                            <>
-                                <div className="w-3.5 h-3.5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
-                                Creating
-                            </>
-                        ) : (
-                            "Create"
-                        )}
-                    </button>
+                <div className="px-6 py-4 border-t border-border/30 flex items-center justify-between bg-muted/10">
+                    <p className="text-[12px] text-muted-foreground/60 hidden sm:block">
+                        {activeTab === "name" && "Tip: Keep names short and descriptive."}
+                        {activeTab === "source" && "You can always edit this link later."}
+                        {activeTab === "details" && "Use formatting to structure your thoughts."}
+                    </p>
+                    <div className="flex items-center gap-2 ml-auto">
+                        <button
+                            onClick={() => onOpenChange(false)}
+                            className="px-4 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-accent/50 transition-all cursor-pointer"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={saveBucket}
+                            disabled={!canProceed || saving}
+                            className="rounded-lg font-medium px-5 text-[13px] h-9 cursor-pointer bg-foreground text-background hover:bg-foreground/90 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm hover:-translate-y-px flex items-center gap-2"
+                        >
+                            {saving ? (
+                                <>
+                                    <div className="w-3.5 h-3.5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                "Create Bucket"
+                            )}
+                        </button>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>
