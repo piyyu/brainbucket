@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogIn, Menu, X, Cpu, Zap, Layers } from "lucide-react";
+import { LogIn, Menu, X } from "lucide-react";
 import { Logo } from "./icons/Logo";
 
 export const Nav = () => {
@@ -13,84 +13,73 @@ export const Nav = () => {
 const NavLanding = () => {
     const [isOpen, setIsOpen] = useState(false);
     const navItems = [
-        { name: "FEATURES", icon: Cpu },
-        { name: "PRICING", icon: Zap },
-        { name: "SYSTEM", icon: Layers },
+        { name: "Features", href: "#features" },
+        { name: "Pricing", href: "#pricing" },
+        { name: "System", href: "#system" },
     ];
 
     return (
         <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl">
-            <div className="relative bg-[#1a1a1a] border border-[#333] px-1 py-1 flex items-center justify-between shadow-2xl rounded-sm">
+            <div className="bg-background/80 backdrop-blur-md border border-border/50 shadow-sm rounded-full px-6 py-3 flex items-center justify-between">
+                <Link to="/" className="flex items-center gap-3 group">
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground shadow-sm">
+                        <Logo width={20} height={20} />
+                    </div>
+                    <span className="text-xl font-display font-semibold tracking-tight text-foreground">
+                        BrainBucket
+                    </span>
+                </Link>
 
-                {/* Inner Bevel Container */}
-                <div className="absolute inset-0 border-bevel pointer-events-none rounded-sm" />
+                <div className="hidden md:flex items-center gap-8 text-sm font-medium">
+                    {navItems.map((item) => (
+                        <a
+                            key={item.name}
+                            href={item.href}
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            {item.name}
+                        </a>
+                    ))}
+                </div>
 
-                <div className="flex items-center justify-between w-full px-5 py-2 bg-[#111] rounded-[1px]">
-                    {/* Logo Section */}
-                    <Link to="/" className="flex items-center gap-3 group">
-                        <div className="w-12 h-12 bg-[#151515] border border-[#333] flex items-center justify-center rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.5)] relative z-10">
-                            <Logo width={32} height={32} />
-                        </div>
-                        <span className="text-lg font-display font-medium tracking-widest text-white/90 text-etched">
-                            BRAINBUCKET
-                        </span>
+                <div className="flex items-center gap-4">
+                    <Link to="/auth">
+                        <button className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-full hover:opacity-90 transition-opacity shadow-sm">
+                            Sign In
+                            <LogIn className="w-4 h-4 ml-1" />
+                        </button>
                     </Link>
 
-                    {/* Desktop Links */}
-                    <div className="hidden md:flex items-center gap-1">
-                        {navItems.map((item) => (
-                            <a
-                                key={item.name}
-                                href={`#${item.name.toLowerCase()}`}
-                                className="px-4 py-2 text-[10px] font-mono tracking-widest text-white/40 hover:text-white hover:bg-[#222] transition-colors uppercase rounded-sm"
-                            >
-                                {item.name}
-                            </a>
-                        ))}
-                    </div>
-
-                    {/* Auth Button & Menu Toggle */}
-                    <div className="flex items-center gap-4">
-                        {/* Login Button */}
-                        <Link to="/auth">
-                            <button className="hidden md:flex items-center gap-2 px-5 py-2 bg-[#e5e5e5] text-black font-mono text-xs uppercase tracking-wider hover:bg-white transition-colors border border-transparent hover:border-white/50 rounded-sm">
-                                <LogIn className="w-3 h-3" />
-                                Initialize
-                            </button>
-                        </Link>
-
-                        {/* Mobile Menu Toggle */}
-                        <button
-                            className="md:hidden text-white/70 hover:text-white"
-                            onClick={() => setIsOpen(!isOpen)}
-                        >
-                            {isOpen ? <X /> : <Menu />}
-                        </button>
-                    </div>
+                    <button
+                        className="md:hidden text-muted-foreground hover:text-foreground p-1"
+                        onClick={() => setIsOpen(!isOpen)}
+                    >
+                        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    </button>
                 </div>
             </div>
 
-            {/* Mobile Menu */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="absolute top-full mt-2 left-0 w-full bg-[#111] border border-[#333] shadow-2xl p-4 flex flex-col gap-2 md:hidden"
+                        className="absolute top-full mt-2 left-0 w-full bg-background border border-border/50 shadow-lg p-4 rounded-2xl flex flex-col gap-2 md:hidden"
                     >
                         {navItems.map((item) => (
-                            <button
+                            <a
                                 key={item.name}
-                                className="flex items-center gap-3 text-white/60 hover:text-white hover:bg-[#222] transition-colors p-3 text-left font-mono text-sm uppercase rounded-sm"
+                                href={item.href}
+                                onClick={() => setIsOpen(false)}
+                                className="text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors p-3 rounded-xl font-medium"
                             >
-                                <item.icon className="w-4 h-4" />
                                 {item.name}
-                            </button>
+                            </a>
                         ))}
-                        <Link to="/auth" className="w-full mt-2">
-                            <button className="w-full py-3 bg-[#e5e5e5] text-black font-mono text-xs uppercase tracking-wider hover:bg-white transition-colors rounded-sm">
-                                Initialize System
+                        <Link to="/auth" className="w-full mt-2" onClick={() => setIsOpen(false)}>
+                            <button className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-xl">
+                                Sign In
                             </button>
                         </Link>
                     </motion.div>

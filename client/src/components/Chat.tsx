@@ -1,8 +1,7 @@
-
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatInput } from "./ChatInput";
-import { Copy, RefreshCw, Cpu } from "lucide-react";
+import { Copy, RefreshCw, Sparkles } from "lucide-react";
 
 type Message = {
   role: "user" | "assistant";
@@ -64,12 +63,9 @@ export const Chat = () => {
   }, [messages, loading]);
 
   return (
-    <div className="text-white h-full w-full overflow-y-auto relative bg-[#0f1012]">
+    <div className="h-full w-full overflow-y-auto relative bg-background">
 
-      {/* Background Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
-
-      <div className="w-full max-w-4xl mx-auto px-4 pt-8 pb-32 space-y-6 relative z-10">
+      <div className="w-full max-w-4xl mx-auto px-4 pt-8 pb-40 space-y-8 relative z-10">
         <AnimatePresence mode="popLayout">
           {messages.map((msg, idx) => (
             <motion.div
@@ -81,32 +77,29 @@ export const Chat = () => {
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.role === "assistant" && (
-                <div className="w-8 h-8 mr-4 rounded bg-[#1a1a1a] border border-[#333] flex items-center justify-center shrink-0 shadow-lg">
-                  <Cpu className="w-4 h-4 text-[#888]" />
+                <div className="w-8 h-8 mr-4 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-1">
+                  <Sparkles className="w-4 h-4" />
                 </div>
               )}
 
               <div
                 className={`
-                  max-w-[80%] p-5 text-sm md:text-base leading-relaxed relative
+                  max-w-[85%] sm:max-w-[75%] p-5 text-[15px] leading-relaxed relative
                   ${msg.role === "user"
-                    ? "bg-[#e5e5e5] text-black rounded-lg shadow-[4px_4px_0px_#111] border border-[#fff]"
-                    : "bg-[#151515] text-[#e0e0e0] rounded-lg border border-[#333] shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
+                    ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm shadow-sm"
+                    : "bg-card text-card-foreground rounded-2xl border border-border/50 shadow-sm"
                   }
                 `}
               >
-                {/* Decorative screw/rivet for aesthetics */}
-                <div className={`absolute top-2 ${msg.role === 'user' ? 'right-2 border-[#ccc]' : 'left-2 border-[#333]'} w-1.5 h-1.5 rounded-full border border-b-0 opacity-50`} />
-
                 {msg.content}
 
                 {msg.role === "assistant" && (
-                  <div className="mt-3 pt-3 border-t border-[#333] flex gap-2">
-                    <button className="text-[10px] uppercase tracking-wider text-[#666] hover:text-[#aaa] flex items-center gap-1 transition-colors">
-                      <Copy className="w-3 h-3" /> Copy
+                  <div className="mt-4 pt-3 border-t border-border/50 flex gap-3">
+                    <button className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors">
+                      <Copy className="w-3.5 h-3.5" /> Copy
                     </button>
-                    <button className="text-[10px] uppercase tracking-wider text-[#666] hover:text-[#aaa] flex items-center gap-1 transition-colors">
-                      <RefreshCw className="w-3 h-3" /> Retry
+                    <button className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors">
+                      <RefreshCw className="w-3.5 h-3.5" /> Retry
                     </button>
                   </div>
                 )}
@@ -117,19 +110,19 @@ export const Chat = () => {
 
         {loading && (
           <div className="flex justify-start items-center gap-4">
-            <div className="w-8 h-8 rounded bg-[#1a1a1a] border border-[#333] flex items-center justify-center shrink-0">
-              <div className="w-2 h-2 bg-[#666] rounded-full animate-ping" />
+            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4 animate-pulse" />
             </div>
-            <div className="text-[#666] text-xs uppercase tracking-widest font-mono animate-pulse">
-              Processing Query...
+            <div className="text-muted-foreground text-sm font-medium animate-pulse">
+              Thinking...
             </div>
           </div>
         )}
         <div className="h-10" ref={bottomRef} />
       </div>
 
-      <div className="fixed bottom-0 left-0 md:left-24 right-0 p-4 md:p-6 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a] to-transparent z-20">
-        <div className="max-w-3xl mx-auto">
+      <div className="fixed bottom-0 left-0 md:left-24 right-0 p-4 md:p-6 bg-gradient-to-t from-background via-background to-transparent z-20 pointer-events-none">
+        <div className="max-w-3xl mx-auto pointer-events-auto">
           <ChatInput
             askQuestion={askQuestion}
             input={input}

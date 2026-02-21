@@ -1,80 +1,47 @@
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Terminal } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
+
 export const Hero = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative h-screen w-full overflow-hidden flex flex-col items-center justify-center text-center px-4 pt-20">
-
-
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:100px_100px]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#0a0a0a_100%)]" />
+    <section className="relative min-h-[100dvh] snap-start w-full flex flex-col items-center justify-center text-center px-4 overflow-hidden bg-background">
+      <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/20 blur-[150px] rounded-full pointer-events-none" />
 
       <motion.div
-        className="relative z-10 max-w-5xl space-y-10"
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
+        className="relative z-10 max-w-4xl space-y-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
-
-
-        <div className="space-y-4">
-          <motion.h1
-            className="text-5xl md:text-8xl font-display font-bold tracking-tighter text-[#e5e5e5] uppercase leading-none text-etched"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-          >
-            Capture Your
-            <br />
-            <span className="text-[#444]">Best Ideas</span>
-          </motion.h1>
+        <div className="mx-auto w-fit inline-flex items-center gap-2 px-3 py-1.5 bg-secondary text-secondary-foreground text-sm rounded-full font-medium mb-4 border border-border/50">
+          <Sparkles className="w-4 h-4 text-muted-foreground" />
+          <span>The intelligent workspace</span>
         </div>
 
+        <h1 className="text-5xl md:text-7xl font-display font-semibold tracking-tight text-foreground leading-[1.1]">
+          Capture your best ideas. <br className="hidden md:block" />
+          <span className="text-muted-foreground">Without the friction.</span>
+        </h1>
 
-        <motion.p
-          className="text-lg md:text-xl font-mono text-[#666] max-w-xl mx-auto leading-relaxed border-l-2 border-[#333] pl-6 text-left"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.8 }}
-        >
-          The fastest way to note, organize, and retrieve your thoughts. Built for focus, designed for speed.
-        </motion.p>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          The fastest way to note, organize, and retrieve your thoughts. BrainBucket is built for focus, designed for clarity, and powered by intelligence.
+        </p>
 
-
-        <motion.div
-          className="flex flex-col sm:flex-row items-center justify-center gap-0 pt-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-        >
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
           <button
             onClick={() => navigate("/auth")}
-            className="group relative px-10 py-5 bg-[#e5e5e5] text-black font-bold uppercase tracking-widest text-xs hover:bg-white transition-colors min-w-[200px]"
+            className="flex items-center justify-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-full hover:opacity-90 transition-opacity w-full sm:w-auto text-base shadow-lg shadow-primary/20"
           >
-            Start for Free
-            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black" />
-            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-black" />
+            Start for free
+            <ArrowRight className="w-4 h-4" />
           </button>
 
-          <button className="group relative px-10 py-5 bg-transparent border border-[#333] text-[#666] hover:text-[#e5e5e5] hover:border-[#666] transition-all min-w-[200px] text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3">
-            <Terminal className="w-3 h-3" />
-            Learn More
+          <button className="px-8 py-4 bg-background border border-border text-foreground hover:bg-secondary transition-colors rounded-full font-semibold w-full sm:w-auto text-base">
+            See how it works
           </button>
-        </motion.div>
-      </motion.div>
-
-
-      <motion.div
-        className="absolute bottom-10 flex w-full justify-between px-10 text-[10px] font-mono text-[#333] uppercase select-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-      >
-        <span>99.9% UPTIME</span>
-        <span>E2E ENCRYPTED</span>
-        <span>GLOBAL CDN</span>
+        </div>
       </motion.div>
     </section>
   );
