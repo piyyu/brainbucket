@@ -7,10 +7,9 @@ import {
     Dialog,
     DialogClose,
     DialogContent,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Plus, Bold, Italic, List, ListOrdered, LinkIcon } from "lucide-react"
+import { Bold, Italic, List, ListOrdered, LinkIcon } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -92,11 +91,10 @@ const ToolbarButton = ({ isActive, onClick, icon }: { isActive: boolean, onClick
     </button>
 )
 
-export function AddBucket() {
+export function AddBucket({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
     const [title, setTitle] = useState("");
     const [link, setLink] = useState("");
     const [description, setDescription] = useState("");
-    const [open, setOpen] = useState(false)
 
     const saveBucket = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -114,7 +112,7 @@ export function AddBucket() {
             setTitle("");
             setLink("");
             setDescription("");
-            setOpen(false);
+            onOpenChange(false);
         }
         catch (error) {
             console.error(error);
@@ -123,17 +121,11 @@ export function AddBucket() {
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <button className="w-full flex items-center gap-2.5 px-2.5 py-[7px] bg-foreground text-background hover:bg-foreground/90 transition-colors rounded-md font-medium text-[13px] cursor-pointer">
-                    <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-                    <span>New Bucket</span>
-                </button>
-            </DialogTrigger>
-            <DialogContent className="w-[95vw] md:w-full md:max-w-4xl h-[80vh] md:h-[600px] bg-background border border-border text-foreground p-0 overflow-hidden flex flex-col md:flex-row gap-0 rounded-lg shadow-vercel">
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="w-[95vw] md:w-full md:max-w-4xl h-[80vh] md:h-[600px] bg-background border border-border/50 text-foreground p-0 overflow-hidden flex flex-col md:flex-row gap-0 rounded-xl shadow-2xl">
                 <Tabs defaultValue="title" className="flex flex-col md:flex-row w-full h-full">
 
-                    <div className="w-full md:w-[240px] shrink-0 border-b md:border-b-0 md:border-r border-border bg-muted/30 p-5 flex flex-col gap-1">
+                    <div className="w-full md:w-[240px] shrink-0 border-b md:border-b-0 md:border-r border-border/50 bg-secondary/20 p-5 flex flex-col gap-1">
                         <div className="mb-6 pt-1">
                             <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground mb-1.5">
                                 New Entry
@@ -220,7 +212,7 @@ export function AddBucket() {
                             </TabsContent>
                         </div>
 
-                        <div className="px-5 py-4 border-t border-border flex justify-between items-center relative z-20">
+                        <div className="px-5 py-4 border-t border-border/50 flex justify-between items-center relative z-20">
                             <DialogClose asChild>
                                 <button className="text-muted-foreground hover:text-foreground font-medium text-[13px] px-3 py-1.5 hover:bg-accent transition-colors rounded-md cursor-pointer">
                                     Cancel
@@ -238,6 +230,6 @@ export function AddBucket() {
                     </div>
                 </Tabs>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     )
 }
