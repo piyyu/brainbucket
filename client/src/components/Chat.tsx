@@ -2,6 +2,8 @@ import { useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatInput } from "./ChatInput";
 import { Copy, RefreshCw, Sparkles, Lightbulb, Search, Zap } from "lucide-react";
+import { toast } from "sonner";
+import { Logo } from "./icons/Logo";
 
 type Message = {
   role: "user" | "assistant";
@@ -24,6 +26,44 @@ interface ChatProps {
 }
 
 export const Chat = ({ messages, setMessages, input, setInput, loading, setLoading }: ChatProps) => {
+  const handleCopy = (content: string) => {
+    navigator.clipboard.writeText(content);
+    toast.success("Copied to clipboard");
+  };
+
+  const handleRetry = async (idx: number) => {
+    if (loading) return;
+    const userMsgIdx = idx - 1;
+    if (userMsgIdx < 0 || messages[userMsgIdx].role !== "user") return;
+
+    const userPrompt = messages[userMsgIdx].content;
+    const newMessages = messages.slice(0, userMsgIdx + 1);
+    setMessages(newMessages);
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/ask`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          auth: localStorage.getItem("token") || "",
+        },
+        body: JSON.stringify({ query: userPrompt }),
+      });
+
+      const data = await response.json();
+      setMessages([...newMessages, { role: "assistant", content: data.answer }]);
+    } catch (error) {
+      setMessages([...newMessages, {
+        role: "assistant",
+        content: "Something went wrong. Please try again.",
+      }]);
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const askQuestion = async () => {
     if (!input.trim() || loading) return;
 
@@ -83,15 +123,22 @@ export const Chat = ({ messages, setMessages, input, setInput, loading, setLoadi
       )}
 
       <div className="w-full max-w-3xl mx-auto px-4 pt-8 pb-36 relative z-10 flex flex-col min-h-full">
-        {/* Empty state */}
+        {/* Empty state — centered with logo and input */}
         {isEmpty && !loading && (
-          <div className="flex-1 flex flex-col items-center justify-center -mt-20">
+          <div className="flex-1 flex flex-col items-center justify-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-center space-y-6"
+              className="text-center space-y-6 w-full max-w-xl"
             >
+              {/* Logo */}
+              <div className="flex justify-center mb-2">
+                <div className="w-14 h-14 bg-foreground rounded-2xl flex items-center justify-center text-background shadow-lg">
+                  <Logo width={28} height={28} />
+                </div>
+              </div>
+
               <div>
                 <h2 className="text-[24px] font-semibold text-foreground tracking-[-0.02em] mb-1">
                   What do you want to know?
@@ -101,8 +148,18 @@ export const Chat = ({ messages, setMessages, input, setInput, loading, setLoadi
                 </p>
               </div>
 
+              {/* Centered input in empty state */}
+              <div className="pt-2">
+                <ChatInput
+                  askQuestion={askQuestion}
+                  input={input}
+                  setInput={setInput}
+                  disabled={loading}
+                />
+              </div>
+
               {/* Suggestion pills */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                 {suggestions.map((s, i) => (
                   <motion.button
                     key={i}
@@ -110,10 +167,11 @@ export const Chat = ({ messages, setMessages, input, setInput, loading, setLoadi
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 + i * 0.1 }}
                     onClick={() => { setInput(s.text); }}
-                    className="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-border/50 bg-secondary/30 backdrop-blur-sm text-[13px] text-muted-foreground hover:text-foreground hover:border-border hover:bg-accent/50 transition-all cursor-pointer card-hover"
+                    className="group flex items-center gap-2 px-3.5 py-2 rounded-lg border border-border/50 bg-secondary/20 backdrop-blur-sm text-[13px] text-muted-foreground hover:text-foreground hover:border-border transition-all cursor-pointer relative overflow-hidden"
                   >
-                    <s.icon className={`w-3.5 h-3.5 ${s.color}`} strokeWidth={1.5} />
-                    {s.text}
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    <s.icon className={`w-3.5 h-3.5 ${s.color} relative z-10`} strokeWidth={1.5} />
+                    <span className="relative z-10">{s.text}</span>
                   </motion.button>
                 ))}
               </div>
@@ -151,12 +209,21 @@ export const Chat = ({ messages, setMessages, input, setInput, loading, setLoadi
 
                 {msg.role === "assistant" && (
                   <div className="mt-3 flex gap-1">
-                    <button className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors cursor-pointer hover:bg-accent px-2 py-1 rounded-md">
+                    <button
+                      onClick={() => handleCopy(msg.content)}
+                      className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors cursor-pointer hover:bg-accent px-2 py-1 rounded-md"
+                    >
                       <Copy className="w-3 h-3" strokeWidth={1.5} /> Copy
                     </button>
-                    <button className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors cursor-pointer hover:bg-accent px-2 py-1 rounded-md">
-                      <RefreshCw className="w-3 h-3" strokeWidth={1.5} /> Retry
-                    </button>
+                    {idx === messages.length - 1 && (
+                      <button
+                        onClick={() => handleRetry(idx)}
+                        disabled={loading}
+                        className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors cursor-pointer hover:bg-accent px-2 py-1 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} strokeWidth={1.5} /> Retry
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -179,17 +246,19 @@ export const Chat = ({ messages, setMessages, input, setInput, loading, setLoadi
         <div className="h-10" ref={bottomRef} />
       </div>
 
-      {/* Chat Input */}
-      <div className={`absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none ${!isEmpty ? 'bg-gradient-to-t from-background via-background/95 to-transparent' : ''}`}>
-        <div className="max-w-3xl mx-auto pointer-events-auto">
-          <ChatInput
-            askQuestion={askQuestion}
-            input={input}
-            setInput={setInput}
-            disabled={loading}
-          />
+      {/* Bottom-anchored input (only when conversation has messages) */}
+      {!isEmpty && (
+        <div className="absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none bg-gradient-to-t from-background via-background/95 to-transparent">
+          <div className="max-w-3xl mx-auto pointer-events-auto">
+            <ChatInput
+              askQuestion={askQuestion}
+              input={input}
+              setInput={setInput}
+              disabled={loading}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { IntegrationsView } from "@/components/IntegrationsView";
 import { SettingsView } from "@/components/SettingsView";
 import { MemoryMapView } from "@/components/MemoryMapView";
 import { BucketsView } from "@/components/BucketsView";
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Logo } from "../components/icons/Logo";
 import { PanelLeftOpen } from "lucide-react";
 
@@ -39,36 +39,61 @@ export const Home = () => {
     } catch { return []; }
   });
 
+  // Track current conversation ID so we don't duplicate-save
+  const currentConvId = useRef<string | null>(null);
+
   const saveConversation = useCallback((msgs: Message[]) => {
     if (msgs.length < 2) return;
     const firstUserMsg = msgs.find(m => m.role === "user");
     const title = firstUserMsg?.content.slice(0, 60) || "Untitled conversation";
-    const conv: Conversation = {
-      id: Date.now().toString(),
-      title,
-      messages: msgs,
-      timestamp: Date.now(),
-    };
-    setConversations(prev => {
-      const updated = [conv, ...prev].slice(0, 50); // keep last 50
-      localStorage.setItem("chat_history", JSON.stringify(updated));
-      return updated;
-    });
+
+    // If we're updating an existing conversation, replace it
+    if (currentConvId.current) {
+      setConversations(prev => {
+        const updated = prev.map(c =>
+          c.id === currentConvId.current ? { ...c, messages: msgs, timestamp: Date.now(), title } : c
+        );
+        localStorage.setItem("chat_history", JSON.stringify(updated));
+        return updated;
+      });
+    } else {
+      const id = Date.now().toString();
+      currentConvId.current = id;
+      const conv: Conversation = { id, title, messages: msgs, timestamp: Date.now() };
+      setConversations(prev => {
+        const updated = [conv, ...prev].slice(0, 50);
+        localStorage.setItem("chat_history", JSON.stringify(updated));
+        return updated;
+      });
+    }
   }, []);
 
-  const startNewChat = useCallback(() => {
-    if (messages.length > 0) {
+  // Auto-save when switching away from chat
+  const handleViewChange = useCallback((view: ViewType) => {
+    if (activeView === "chat" && view !== "chat" && messages.length >= 2) {
       saveConversation(messages);
     }
+    setActiveView(view);
+    setIsMobileMenuOpen(false);
+  }, [activeView, messages, saveConversation]);
+
+  const startNewChat = useCallback(() => {
+    // Save current conversation first
+    if (messages.length >= 2) {
+      saveConversation(messages);
+    }
+    currentConvId.current = null;
     setMessages([]);
     setInput("");
     setActiveView("chat");
   }, [messages, saveConversation]);
 
   const loadConversation = useCallback((conv: Conversation) => {
-    if (messages.length > 0) {
+    // Save current conversation first
+    if (messages.length >= 2) {
       saveConversation(messages);
     }
+    currentConvId.current = conv.id;
     setMessages(conv.messages);
     setInput("");
     setActiveView("chat");
@@ -80,6 +105,11 @@ export const Home = () => {
       localStorage.setItem("chat_history", JSON.stringify(updated));
       return updated;
     });
+    // If deleting the current conversation, reset
+    if (currentConvId.current === id) {
+      currentConvId.current = null;
+      setMessages([]);
+    }
   }, []);
 
   return (
@@ -89,7 +119,7 @@ export const Home = () => {
         onMobileClose={() => setIsMobileMenuOpen(false)}
         isDesktopOpen={isDesktopSidebarOpen}
         onDesktopToggle={() => setIsDesktopSidebarOpen(!isDesktopSidebarOpen)}
-        onViewChange={(view) => { setActiveView(view); setIsMobileMenuOpen(false); }}
+        onViewChange={handleViewChange}
         activeView={activeView}
         onNewChat={startNewChat}
       />
@@ -119,7 +149,7 @@ export const Home = () => {
           <span className="ml-2.5 font-semibold text-[14px] tracking-[-0.01em]">BrainBucket</span>
         </div>
 
-        {/* Main Content — use display:none instead of conditional rendering to persist Chat state */}
+        {/* Main Content — Chat uses display toggle to persist DOM state */}
         <div className="flex-1 relative overflow-hidden">
           <div className={activeView === "chat" ? "h-full" : "hidden"}>
             <Chat

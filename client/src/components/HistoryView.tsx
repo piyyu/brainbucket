@@ -20,6 +20,18 @@ interface HistoryViewProps {
   onDeleteConversation: (id: string) => void;
 }
 
+// Rotating gradient palette — each conversation gets a unique color
+const GRADIENTS = [
+  { gradient: "from-indigo-500/8 to-violet-500/8", icon: "from-indigo-500/20 to-violet-500/20", border: "border-indigo-500/10", text: "text-indigo-400" },
+  { gradient: "from-sky-500/8 to-blue-500/8", icon: "from-sky-500/20 to-blue-500/20", border: "border-sky-500/10", text: "text-sky-400" },
+  { gradient: "from-purple-500/8 to-fuchsia-500/8", icon: "from-purple-500/20 to-fuchsia-500/20", border: "border-purple-500/10", text: "text-purple-400" },
+  { gradient: "from-emerald-500/8 to-teal-500/8", icon: "from-emerald-500/20 to-teal-500/20", border: "border-emerald-500/10", text: "text-emerald-400" },
+  { gradient: "from-amber-500/8 to-orange-500/8", icon: "from-amber-500/20 to-orange-500/20", border: "border-amber-500/10", text: "text-amber-400" },
+  { gradient: "from-rose-500/8 to-pink-500/8", icon: "from-rose-500/20 to-pink-500/20", border: "border-rose-500/10", text: "text-rose-400" },
+  { gradient: "from-cyan-500/8 to-sky-500/8", icon: "from-cyan-500/20 to-sky-500/20", border: "border-cyan-500/10", text: "text-cyan-400" },
+  { gradient: "from-violet-500/8 to-purple-500/8", icon: "from-violet-500/20 to-purple-500/20", border: "border-violet-500/10", text: "text-violet-400" },
+];
+
 const timeAgo = (ts: number) => {
   const diff = Date.now() - ts;
   const mins = Math.floor(diff / 60000);
@@ -90,6 +102,7 @@ export const HistoryView = ({ conversations, onLoadConversation, onDeleteConvers
               {filtered.map((conv, idx) => {
                 const msgCount = conv.messages.length;
                 const lastMsg = conv.messages[conv.messages.length - 1];
+                const colors = GRADIENTS[idx % GRADIENTS.length];
 
                 return (
                   <motion.div
@@ -100,12 +113,12 @@ export const HistoryView = ({ conversations, onLoadConversation, onDeleteConvers
                     onClick={() => onLoadConversation(conv)}
                     className="group relative flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-secondary/10 backdrop-blur-sm cursor-pointer transition-all duration-200 hover:bg-accent/40 hover:border-border hover:shadow-md hover:-translate-y-[1px]"
                   >
-                    {/* Hover gradient overlay */}
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    {/* Unique hover gradient per item */}
+                    <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${colors.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />
                     <div className="absolute top-0 left-0 right-0 h-px rounded-t-xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/10 flex items-center justify-center shrink-0 relative z-10 group-hover:from-indigo-500/30 group-hover:to-purple-500/30 transition-all">
-                      <MessageSquare className="w-4 h-4 text-indigo-400" strokeWidth={1.5} />
+                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${colors.icon} ${colors.border} border flex items-center justify-center shrink-0 relative z-10 transition-all`}>
+                      <MessageSquare className={`w-4 h-4 ${colors.text}`} strokeWidth={1.5} />
                     </div>
 
                     <div className="flex-1 min-w-0 overflow-hidden relative z-10">

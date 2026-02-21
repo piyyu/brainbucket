@@ -7,9 +7,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, FolderOpen, History, Grid3X3, ChevronDown, Settings, LogOut, MessageSquare, Network } from "lucide-react";
+import { Plus, FolderOpen, History, Grid3X3, ChevronDown, Settings, LogOut, MessageSquare, Network, SquarePen } from "lucide-react";
 import { Logo } from "./icons/Logo";
 import { AddBucket } from "./AddBucket";
+
+const NAV_ITEMS = [
+  { view: "chat", icon: MessageSquare, label: "Chat", gradient: "from-indigo-500/8 to-violet-500/8" },
+  { view: "buckets", icon: FolderOpen, label: "Explore Buckets", gradient: "from-sky-500/8 to-blue-500/8" },
+  { view: "history", icon: History, label: "History", gradient: "from-purple-500/8 to-fuchsia-500/8" },
+  { view: "memory-map", icon: Network, label: "Memory Map", gradient: "from-emerald-500/8 to-teal-500/8" },
+  { view: "integrations", icon: Grid3X3, label: "Integrations", gradient: "from-amber-500/8 to-orange-500/8" },
+];
 
 interface SidebarProps {
   isMobileOpen: boolean;
@@ -49,26 +57,6 @@ export const Sidebar = ({
     navigate("/");
   };
 
-  const navItem = (
-    view: string,
-    icon: React.ReactNode,
-    label: string,
-    onClick?: () => void
-  ) => (
-    <button
-      onClick={onClick || (() => onViewChange?.(view as any))}
-      className={`w-full flex items-center gap-2.5 px-2.5 py-[7px] rounded-md text-[13px] font-medium transition-colors cursor-pointer
-        ${activeView === view
-          ? "bg-accent text-accent-foreground"
-          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-        }
-      `}
-    >
-      {icon}
-      <span>{label}</span>
-    </button>
-  );
-
   return (
     <>
       {isMobileOpen && (
@@ -89,7 +77,7 @@ export const Sidebar = ({
         <div className="flex items-center h-14 px-4 border-b border-border/50 w-[260px]">
           <button
             onClick={onDesktopToggle}
-            className="flex items-center gap-2.5 w-full text-left focus:outline-none group cursor-pointer"
+            className="flex items-center gap-2.5 flex-1 text-left focus:outline-none group cursor-pointer"
           >
             <div className="w-7 h-7 bg-foreground rounded-[6px] flex items-center justify-center text-background shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all">
               <Logo width={16} height={16} />
@@ -97,6 +85,14 @@ export const Sidebar = ({
             <span className="font-semibold text-[14px] text-foreground tracking-[-0.01em]">
               BrainBucket
             </span>
+          </button>
+          {/* New Chat button in header */}
+          <button
+            onClick={onNewChat}
+            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all cursor-pointer"
+            title="New Chat"
+          >
+            <SquarePen className="w-4 h-4" strokeWidth={1.5} />
           </button>
         </div>
 
@@ -111,25 +107,44 @@ export const Sidebar = ({
           </button>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation — each item gets its own unique gradient hover color */}
         <nav className="flex flex-col gap-0.5 px-2 pt-3 w-[260px] flex-1">
-          {navItem("chat", <MessageSquare className="w-4 h-4" strokeWidth={1.5} />, "Chat", () => onNewChat?.())}
-          {navItem("buckets", <FolderOpen className="w-4 h-4" strokeWidth={1.5} />, "Explore Buckets")}
-          {navItem("history", <History className="w-4 h-4" strokeWidth={1.5} />, "History")}
-          {navItem("memory-map", <Network className="w-4 h-4" strokeWidth={1.5} />, "Memory Map")}
-          {navItem("integrations", <Grid3X3 className="w-4 h-4" strokeWidth={1.5} />, "Integrations")}
+          {NAV_ITEMS.map((item) => {
+            const isActive = activeView === item.view;
+            return (
+              <button
+                key={item.view}
+                onClick={() => onViewChange?.(item.view as any)}
+                className={`group w-full flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[13px] font-medium transition-all duration-200 cursor-pointer relative overflow-hidden
+                  ${isActive
+                    ? "bg-accent/80 text-accent-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-accent-foreground hover:bg-accent/50"
+                  }
+                `}
+              >
+                {!isActive && (
+                  <div className={`absolute inset-0 bg-gradient-to-r ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-lg`} />
+                )}
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <item.icon className="w-4 h-4" strokeWidth={1.5} />
+                  <span>{item.label}</span>
+                </span>
+              </button>
+            );
+          })}
         </nav>
 
         {/* Footer */}
         <div className="px-2 pb-3 w-[260px]">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent text-foreground text-[13px] font-medium transition-colors cursor-pointer">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white text-[10px] font-semibold shrink-0 shadow-sm">
+              <button className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-accent/50 text-foreground text-[13px] font-medium transition-all cursor-pointer group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-lg" />
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white text-[10px] font-semibold shrink-0 shadow-sm relative z-10">
                   {avatarInitial}
                 </div>
-                <span className="flex-1 text-left truncate">{displayName}</span>
-                <ChevronDown className="w-3 h-3 text-muted-foreground" strokeWidth={1.5} />
+                <span className="flex-1 text-left truncate relative z-10">{displayName}</span>
+                <ChevronDown className="w-3 h-3 text-muted-foreground relative z-10" strokeWidth={1.5} />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
