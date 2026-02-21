@@ -1,51 +1,42 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Clock, FileText, ExternalLink, Trash2, Search } from "lucide-react";
-import axios from "axios";
+import { MessageSquare, Trash2, ArrowRight, Clock, Search } from "lucide-react";
+import { useState } from "react";
 
-interface HistoryItem {
-  _id: string;
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+type Conversation = {
+  id: string;
   title: string;
-  link?: string;
-  description?: string;
+  messages: Message[];
+  timestamp: number;
+};
+
+interface HistoryViewProps {
+  conversations: Conversation[];
+  onLoadConversation: (conv: Conversation) => void;
+  onDeleteConversation: (id: string) => void;
 }
 
-export const HistoryView = () => {
-  const [items, setItems] = useState<HistoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
+const timeAgo = (ts: number) => {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(ts).toLocaleDateString();
+};
+
+export const HistoryView = ({ conversations, onLoadConversation, onDeleteConversation }: HistoryViewProps) => {
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    fetchHistory();
-  }, []);
-
-  const fetchHistory = async () => {
-    try {
-      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/buckets/list`, {
-        headers: { auth: localStorage.getItem("token") || "" }
-      });
-      setItems(res.data.contents || []);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteBucket = async (id: string) => {
-    try {
-      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/v1/bucket/delete`, {
-        headers: { auth: localStorage.getItem("token") || "" },
-        data: { contentId: id }
-      });
-      setItems((prev) => prev.filter((i) => i._id !== id));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const filtered = items.filter((item) =>
-    item.title.toLowerCase().includes(search.toLowerCase())
+  const filtered = conversations.filter((c) =>
+    c.title.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -60,12 +51,12 @@ export const HistoryView = () => {
         >
           <div className="flex items-center justify-between mb-8">
             <div className="min-w-0">
-              <h1 className="text-[22px] font-semibold text-foreground tracking-[-0.02em]">History</h1>
-              <p className="text-[14px] text-muted-foreground mt-0.5">All your saved buckets and notes</p>
+              <h1 className="text-[22px] font-semibold text-foreground tracking-[-0.02em]">Chat History</h1>
+              <p className="text-[14px] text-muted-foreground mt-0.5">Your past conversations with BrainBucket</p>
             </div>
             <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground shrink-0">
               <Clock className="w-3.5 h-3.5" strokeWidth={1.5} />
-              {items.length} items
+              {conversations.length} conversation{conversations.length !== 1 ? "s" : ""}
             </div>
           </div>
 
@@ -74,7 +65,7 @@ export const HistoryView = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
             <input
               type="text"
-              placeholder="Search history..."
+              placeholder="Search conversations..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full h-10 pl-10 pr-4 rounded-lg bg-secondary/30 backdrop-blur-sm border border-border/50 text-[14px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-border transition-all"
@@ -82,63 +73,71 @@ export const HistoryView = () => {
           </div>
 
           {/* List */}
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: "300ms" }} />
-              </div>
-            </div>
-          ) : filtered.length === 0 ? (
+          {filtered.length === 0 ? (
             <div className="text-center py-20 space-y-3">
-              <FileText className="w-10 h-10 mx-auto text-muted-foreground/30" strokeWidth={1} />
+              <MessageSquare className="w-10 h-10 mx-auto text-muted-foreground/20" strokeWidth={1} />
               <div>
                 <p className="text-[15px] text-foreground font-medium">
-                  {search ? "No matching results" : "No buckets yet"}
+                  {search ? "No matching conversations" : "No conversations yet"}
                 </p>
                 <p className="text-[13px] text-muted-foreground mt-0.5">
-                  {search ? "Try a different search term" : "Create your first bucket to get started"}
+                  {search ? "Try a different search term" : "Start chatting to build your history"}
                 </p>
               </div>
             </div>
           ) : (
             <div className="space-y-2">
-              {filtered.map((item, idx) => (
-                <motion.div
-                  key={item._id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.03 }}
-                  className="group flex items-center justify-between p-4 rounded-xl border border-border/50 bg-secondary/20 backdrop-blur-sm hover:bg-accent/30 hover:border-border transition-all cursor-default"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
-                    <div className="w-8 h-8 rounded-lg bg-secondary border border-border/50 flex items-center justify-center shrink-0">
-                      <FileText className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
-                    </div>
-                    <div className="min-w-0 overflow-hidden">
-                      <p className="text-[14px] font-medium text-foreground truncate">{item.title}</p>
-                      {item.link && (
-                        <p className="text-[12px] text-muted-foreground truncate">{item.link}</p>
-                      )}
-                    </div>
-                  </div>
+              {filtered.map((conv, idx) => {
+                const msgCount = conv.messages.length;
+                const lastMsg = conv.messages[conv.messages.length - 1];
 
-                  <div className="flex items-center gap-1 shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {item.link && (
-                      <a href={item.link} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
-                        <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
-                      </a>
-                    )}
-                    <button
-                      onClick={() => deleteBucket(item._id)}
-                      className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
+                return (
+                  <motion.div
+                    key={conv.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.03 }}
+                    onClick={() => onLoadConversation(conv)}
+                    className="group relative flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-secondary/10 backdrop-blur-sm cursor-pointer transition-all duration-200 hover:bg-accent/40 hover:border-border hover:shadow-md hover:-translate-y-[1px]"
+                  >
+                    {/* Hover gradient overlay */}
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    <div className="absolute top-0 left-0 right-0 h-px rounded-t-xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/10 flex items-center justify-center shrink-0 relative z-10 group-hover:from-indigo-500/30 group-hover:to-purple-500/30 transition-all">
+                      <MessageSquare className="w-4 h-4 text-indigo-400" strokeWidth={1.5} />
+                    </div>
+
+                    <div className="flex-1 min-w-0 overflow-hidden relative z-10">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <p className="text-[14px] font-medium text-foreground truncate">{conv.title}</p>
+                      </div>
+                      {lastMsg && (
+                        <p className="text-[12px] text-muted-foreground truncate">
+                          {lastMsg.role === "assistant" ? "AI: " : "You: "}{lastMsg.content.slice(0, 80)}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[11px] text-muted-foreground/60">{timeAgo(conv.timestamp)}</span>
+                        <span className="text-border/30">·</span>
+                        <span className="text-[11px] text-muted-foreground/60">{msgCount} message{msgCount !== 1 ? "s" : ""}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0 relative z-10">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onDeleteConversation(conv.id); }}
+                        className="p-1.5 rounded-md text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+                      </button>
+                      <div className="p-1.5 rounded-md text-muted-foreground/30 group-hover:text-foreground transition-all">
+                        <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </motion.div>

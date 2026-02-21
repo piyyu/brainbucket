@@ -10,15 +10,15 @@ import {
 import { Plus, FolderOpen, History, Grid3X3, ChevronDown, Settings, LogOut, MessageSquare, Network } from "lucide-react";
 import { Logo } from "./icons/Logo";
 import { AddBucket } from "./AddBucket";
-import { Buckets } from "./Buckets";
 
 interface SidebarProps {
   isMobileOpen: boolean;
   onMobileClose: () => void;
   isDesktopOpen: boolean;
   onDesktopToggle: () => void;
-  onViewChange?: (view: "chat" | "history" | "integrations" | "settings" | "memory-map") => void;
+  onViewChange?: (view: "chat" | "history" | "integrations" | "settings" | "memory-map" | "buckets") => void;
   activeView?: string;
+  onNewChat?: () => void;
 }
 
 export const Sidebar = ({
@@ -28,9 +28,9 @@ export const Sidebar = ({
   onDesktopToggle,
   onViewChange,
   activeView = "chat",
+  onNewChat,
 }: SidebarProps) => {
   const [addBucketOpen, setAddBucketOpen] = useState(false);
-  const [bucketsOpen, setBucketsOpen] = useState(false);
   const navigate = useNavigate();
 
   const user = useMemo(() => {
@@ -113,8 +113,8 @@ export const Sidebar = ({
 
         {/* Navigation */}
         <nav className="flex flex-col gap-0.5 px-2 pt-3 w-[260px] flex-1">
-          {navItem("chat", <MessageSquare className="w-4 h-4" strokeWidth={1.5} />, "Chat")}
-          {navItem("buckets", <FolderOpen className="w-4 h-4" strokeWidth={1.5} />, "Explore Buckets", () => setBucketsOpen(true))}
+          {navItem("chat", <MessageSquare className="w-4 h-4" strokeWidth={1.5} />, "Chat", () => onNewChat?.())}
+          {navItem("buckets", <FolderOpen className="w-4 h-4" strokeWidth={1.5} />, "Explore Buckets")}
           {navItem("history", <History className="w-4 h-4" strokeWidth={1.5} />, "History")}
           {navItem("memory-map", <Network className="w-4 h-4" strokeWidth={1.5} />, "Memory Map")}
           {navItem("integrations", <Grid3X3 className="w-4 h-4" strokeWidth={1.5} />, "Integrations")}
@@ -156,7 +156,6 @@ export const Sidebar = ({
       </aside>
 
       <AddBucket open={addBucketOpen} onOpenChange={setAddBucketOpen} />
-      <Buckets open={bucketsOpen} onOpenChange={setBucketsOpen} />
     </>
   );
 };

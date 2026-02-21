@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatInput } from "./ChatInput";
 import { Copy, RefreshCw, Sparkles, Lightbulb, Search, Zap } from "lucide-react";
@@ -14,11 +14,16 @@ const suggestions = [
   { icon: Zap, text: "What did I write last week?", color: "text-emerald-400" },
 ];
 
-export const Chat = () => {
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
+interface ChatProps {
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+  input: string;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
+  loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
+export const Chat = ({ messages, setMessages, input, setInput, loading, setLoading }: ChatProps) => {
   const askQuestion = async () => {
     if (!input.trim() || loading) return;
 
@@ -174,7 +179,7 @@ export const Chat = () => {
         <div className="h-10" ref={bottomRef} />
       </div>
 
-      {/* Chat Input — uses absolute so it follows parent container, not viewport */}
+      {/* Chat Input */}
       <div className={`absolute bottom-0 left-0 right-0 p-4 z-20 pointer-events-none ${!isEmpty ? 'bg-gradient-to-t from-background via-background/95 to-transparent' : ''}`}>
         <div className="max-w-3xl mx-auto pointer-events-auto">
           <ChatInput
