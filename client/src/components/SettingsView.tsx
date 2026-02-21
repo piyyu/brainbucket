@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { User, Mail, Lock, Bell, Palette, Shield, Save, Check } from "lucide-react";
+import { User, Lock, Bell, Palette, Shield, Save, Check } from "lucide-react";
 import { useTheme } from "./theme-provider";
 
 export const SettingsView = () => {
