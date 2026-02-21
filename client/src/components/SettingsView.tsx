@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Lock, Bell, Palette, Shield, Save, Check } from "lucide-react";
+import { useTheme } from "./theme-provider";
 
 export const SettingsView = () => {
   const user = useMemo(() => {
@@ -13,6 +14,7 @@ export const SettingsView = () => {
   const [username, setUsername] = useState(user?.username || "");
   const [email, setEmail] = useState(user?.email || "");
   const [saved, setSaved] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const handleSave = () => {
     // Update localStorage (in a real app, this would be an API call)
@@ -109,12 +111,13 @@ export const SettingsView = () => {
           <div>
             <label className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Theme</label>
             <div className="flex gap-2">
-              {["Dark", "Light", "System"].map((t) => (
+              {["dark", "light", "system"].map((t) => (
                 <button
                   key={t}
-                  className={`flex-1 h-10 rounded-lg text-[13px] font-medium transition-all cursor-pointer border ${t === "Dark"
-                      ? "bg-foreground text-background border-foreground"
-                      : "bg-secondary/30 text-muted-foreground border-border/50 hover:border-border hover:text-foreground"
+                  onClick={() => setTheme(t as "dark" | "light" | "system")}
+                  className={`flex-1 h-10 rounded-lg text-[13px] font-medium transition-all cursor-pointer border capitalize ${theme === t
+                    ? "bg-foreground text-background border-foreground shadow-sm"
+                    : "bg-secondary/30 text-muted-foreground border-border/50 hover:border-border hover:text-foreground hover:bg-secondary/50"
                     }`}
                 >
                   {t}
@@ -184,7 +187,7 @@ export const SettingsView = () => {
                 className="group relative p-5 rounded-xl border border-border/50 bg-secondary/10 backdrop-blur-sm overflow-hidden"
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${section.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/5 to-transparent" />
 
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-4">

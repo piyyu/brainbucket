@@ -71,11 +71,11 @@ export const IntegrationsView = () => {
               >
                 {/* Hover gradient */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/5 to-transparent" />
 
                 <div className="relative z-10 flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4">
-                    <div className={`w-10 h-10 rounded-lg bg-secondary border border-border/50 flex items-center justify-center ${item.color} group-hover:border-white/10 transition-colors shrink-0`}>
+                    <div className={`w-10 h-10 rounded-lg bg-secondary border border-border/50 flex items-center justify-center ${item.color} group-hover:border-foreground/10 transition-colors shrink-0`}>
                       <item.icon className="w-5 h-5" strokeWidth={1.5} />
                     </div>
                     <div>

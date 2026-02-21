@@ -129,7 +129,7 @@ export const BucketsView = () => {
                   >
                     {/* Unique hover gradient per item */}
                     <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${colors.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />
-                    <div className="absolute top-0 left-0 right-0 h-px rounded-t-xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute top-0 left-0 right-0 h-px rounded-t-xl bg-gradient-to-r from-transparent via-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                     <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${colors.icon} ${colors.border} border flex items-center justify-center shrink-0 relative z-10 transition-all`}>
                       <FileText className={`w-4 h-4 ${colors.text}`} strokeWidth={1.5} />

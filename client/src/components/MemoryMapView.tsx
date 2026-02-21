@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Network, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 import axios from "axios";
+import { useTheme } from "./theme-provider";
 
 interface Bucket {
   _id: string;
@@ -52,6 +53,12 @@ export const MemoryMapView = () => {
   const isDragging = useRef(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const draggedNode = useRef<string | null>(null);
+  const { theme } = useTheme();
+
+  const isDark = useMemo(() => {
+    if (theme === "system") return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    return theme === "dark";
+  }, [theme]);
 
   useEffect(() => {
     const fetchBuckets = async () => {
@@ -248,7 +255,7 @@ export const MemoryMapView = () => {
           ctx.lineWidth = 1.5;
           ctx.globalAlpha = 0.8;
         } else {
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+          ctx.strokeStyle = isDark ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.06)";
           ctx.lineWidth = 0.8;
           ctx.globalAlpha = 1;
         }
@@ -301,7 +308,7 @@ export const MemoryMapView = () => {
         // Border ring
         ctx.beginPath();
         ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
-        ctx.strokeStyle = isHovered ? "rgba(255,255,255,0.35)" : node.borderColor;
+        ctx.strokeStyle = isHovered ? (isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.25)") : node.borderColor;
         ctx.lineWidth = isHovered ? 1.5 : 0.8;
         ctx.stroke();
 
@@ -323,11 +330,13 @@ export const MemoryMapView = () => {
         ctx.textAlign = "center";
 
         // Text shadow
-        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fillStyle = isDark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.15)";
         ctx.fillText(node.label, node.x + 0.5, node.y + r + 15.5);
 
         // Text
-        ctx.fillStyle = isHovered ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.55)";
+        ctx.fillStyle = isHovered
+          ? (isDark ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.9)")
+          : (isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)");
         ctx.fillText(node.label, node.x, node.y + r + 15);
       }
 
@@ -340,7 +349,7 @@ export const MemoryMapView = () => {
       cancelAnimationFrame(animRef.current);
       window.removeEventListener("resize", resize);
     };
-  }, [buckets, zoom, hoveredNode]);
+  }, [buckets, zoom, hoveredNode, isDark]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const rect = canvasRef.current?.getBoundingClientRect();
