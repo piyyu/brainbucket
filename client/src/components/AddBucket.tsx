@@ -5,8 +5,7 @@ import {
     Dialog,
     DialogContent,
 } from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Bold, Italic, List, ListOrdered, Globe, X, Type, AlignLeft } from "lucide-react"
+import { Bold, Italic, List, ListOrdered, Globe, X, ArrowRight, ArrowLeft, Check } from "lucide-react"
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -25,7 +24,7 @@ const RichTextEditor = ({ content, onChange }: { content: string, onChange: (con
         },
         editorProps: {
             attributes: {
-                class: 'min-h-[200px] w-full rounded-md bg-transparent px-4 py-3 text-[14px] leading-relaxed placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 prose prose-neutral dark:prose-invert max-w-none prose-p:my-1.5 prose-headings:mb-2 prose-headings:mt-3',
+                class: 'min-h-[160px] w-full rounded-md bg-transparent px-4 py-3 text-[14px] leading-relaxed placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 prose prose-neutral dark:prose-invert max-w-none prose-p:my-1.5 prose-headings:mb-2 prose-headings:mt-3',
             },
         },
     })
@@ -33,38 +32,44 @@ const RichTextEditor = ({ content, onChange }: { content: string, onChange: (con
     if (!editor) return null
 
     return (
-        <div className="flex flex-col w-full h-full relative border-none bg-transparent">
-            <EditorContent editor={editor} className="flex-1 overflow-y-auto h-[120px] max-h-[160px] md:h-[180px] md:max-h-[200px]" />
-            <div className="flex items-center gap-0.5 border-t border-border/30 bg-muted/30 p-1.5 select-none rounded-b-xl">
+        <div className="flex flex-col w-full border border-border/50 rounded-lg bg-background overflow-hidden transition-all duration-200 focus-within:border-ring/30 focus-within:shadow-[0_0_0_3px_rgba(99,102,241,0.08)]">
+            {/* Toolbar */}
+            <div className="flex items-center gap-1 border-b border-border/30 bg-muted/20 px-2 py-1.5 select-none shrink-0">
                 <ToolbarButton
                     isActive={editor.isActive('bold')}
                     onClick={() => editor.chain().focus().toggleBold().run()}
-                    icon={<Bold className="h-3.5 w-3.5" strokeWidth={1.75} />}
+                    icon={<Bold className="h-4 w-4" strokeWidth={1.75} />}
+                    label="Bold"
                 />
                 <ToolbarButton
                     isActive={editor.isActive('italic')}
                     onClick={() => editor.chain().focus().toggleItalic().run()}
-                    icon={<Italic className="h-3.5 w-3.5" strokeWidth={1.75} />}
+                    icon={<Italic className="h-4 w-4" strokeWidth={1.75} />}
+                    label="Italic"
                 />
-                <div className="w-px h-4 bg-border/30 mx-0.5" />
+                <div className="w-px h-4 bg-border/40 mx-1" />
                 <ToolbarButton
                     isActive={editor.isActive('bulletList')}
                     onClick={() => editor.chain().focus().toggleBulletList().run()}
-                    icon={<List className="h-3.5 w-3.5" strokeWidth={1.75} />}
+                    icon={<List className="h-4 w-4" strokeWidth={1.75} />}
+                    label="Bullet list"
                 />
                 <ToolbarButton
                     isActive={editor.isActive('orderedList')}
                     onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                    icon={<ListOrdered className="h-3.5 w-3.5" strokeWidth={1.75} />}
+                    icon={<ListOrdered className="h-4 w-4" strokeWidth={1.75} />}
+                    label="Ordered list"
                 />
             </div>
+            <EditorContent editor={editor} className="flex-1 overflow-y-auto max-h-[200px]" />
         </div>
     )
 }
 
-const ToolbarButton = ({ isActive, onClick, icon }: { isActive: boolean, onClick: () => void, icon: React.ReactNode }) => (
+const ToolbarButton = ({ isActive, onClick, icon, label }: { isActive: boolean, onClick: () => void, icon: React.ReactNode, label: string }) => (
     <button
-        className={`h-7 w-7 flex items-center justify-center rounded-md transition-all cursor-pointer ${isActive
+        title={label}
+        className={`h-8 w-8 flex items-center justify-center rounded-md transition-all cursor-pointer ${isActive
             ? 'bg-accent text-accent-foreground shadow-sm'
             : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
             }`}
@@ -74,14 +79,17 @@ const ToolbarButton = ({ isActive, onClick, icon }: { isActive: boolean, onClick
     </button>
 )
 
+const STEPS = ["Name", "Source", "Details"] as const;
+type Step = typeof STEPS[number];
 
 export function AddBucket({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
     const [title, setTitle] = useState("");
     const [link, setLink] = useState("");
     const [description, setDescription] = useState("");
     const [saving, setSaving] = useState(false);
+    const [stepIndex, setStepIndex] = useState(0);
 
-
+    const currentStep: Step = STEPS[stepIndex];
 
     const saveBucket = async () => {
         if (!title || saving) return;
@@ -97,10 +105,7 @@ export function AddBucket({ open, onOpenChange }: { open: boolean; onOpenChange:
                 }
             });
             toast.success("Bucket created!");
-            setTitle("");
-            setLink("");
-            setDescription("");
-            onOpenChange(false);
+            resetAndClose();
         }
         catch (error) {
             console.error(error);
@@ -110,163 +115,158 @@ export function AddBucket({ open, onOpenChange }: { open: boolean; onOpenChange:
         }
     }
 
-    const [activeTab, setActiveTab] = useState("name");
-
-    const handleTabChange = (val: string) => setActiveTab(val);
+    const resetAndClose = () => {
+        setTitle("");
+        setLink("");
+        setDescription("");
+        setStepIndex(0);
+        onOpenChange(false);
+    };
 
     const canProceed = title.trim().length > 0;
 
+    const goNext = () => {
+        if (stepIndex < STEPS.length - 1) setStepIndex(i => i + 1);
+        else saveBucket();
+    };
+
+    const goBack = () => {
+        if (stepIndex > 0) setStepIndex(i => i - 1);
+    };
+
+    const isLastStep = stepIndex === STEPS.length - 1;
+
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[95vw] md:w-full md:max-w-[760px] bg-background/80 backdrop-blur-xl border border-border/40 text-foreground p-0 overflow-hidden rounded-2xl shadow-[0_0_40px_-10px_rgba(0,0,0,0.3)] [&>button]:hidden">
+        <Dialog open={open} onOpenChange={resetAndClose}>
+            <DialogContent className="w-[95vw] sm:w-[560px] h-[480px] bg-background border border-border/50 text-foreground p-0 overflow-hidden rounded-xl shadow-2xl [&>button]:hidden flex flex-col">
 
-                {/* Ambient glow */}
-                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
-                <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-sky-500/10 rounded-full blur-[100px] pointer-events-none" />
-
-                <div className="flex h-[420px] relative z-10">
-                    {/* Sidebar TabsList */}
-                    <div className="w-[200px] shrink-0 border-r border-border/30 bg-secondary/20 flex flex-col justify-between">
-                        <div>
-                            <div className="h-16 flex items-center px-5 border-b border-border/30">
-                                <h2 className="text-[16px] font-semibold text-foreground tracking-[-0.02em]">
-                                    Create Bucket
-                                </h2>
-                            </div>
-                            <div className="p-3">
-                                <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                                    <TabsList className="flex flex-col h-auto bg-transparent p-0 gap-1.5 space-y-0">
-                                        <TabsTrigger
-                                            value="name"
-                                            className="w-full justify-start px-3 py-2.5 h-auto text-[13px] font-medium data-[state=active]:bg-background/80 data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/50 rounded-xl group transition-all"
-                                        >
-                                            <div className="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center mr-3 group-data-[state=active]:bg-indigo-500/20 group-data-[state=active]:shadow-inner transition-colors">
-                                                <Type className="w-3.5 h-3.5 text-indigo-400 opacity-70 group-data-[state=active]:opacity-100" strokeWidth={2} />
-                                            </div>
-                                            Name
-                                        </TabsTrigger>
-                                        <TabsTrigger
-                                            value="source"
-                                            className="w-full justify-start px-3 py-2.5 h-auto text-[13px] font-medium data-[state=active]:bg-background/80 data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/50 rounded-xl group transition-all"
-                                        >
-                                            <div className="w-7 h-7 rounded-lg bg-sky-500/10 flex items-center justify-center mr-3 group-data-[state=active]:bg-sky-500/20 group-data-[state=active]:shadow-inner transition-colors">
-                                                <Globe className="w-3.5 h-3.5 text-sky-400 opacity-70 group-data-[state=active]:opacity-100" strokeWidth={2} />
-                                            </div>
-                                            Source List
-                                        </TabsTrigger>
-                                        <TabsTrigger
-                                            value="details"
-                                            className="w-full justify-start px-3 py-2.5 h-auto text-[13px] font-medium data-[state=active]:bg-background/80 data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/50 rounded-xl group transition-all"
-                                        >
-                                            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center mr-3 group-data-[state=active]:bg-emerald-500/20 group-data-[state=active]:shadow-inner transition-colors">
-                                                <AlignLeft className="w-3.5 h-3.5 text-emerald-400 opacity-70 group-data-[state=active]:opacity-100" strokeWidth={2} />
-                                            </div>
-                                            Details
-                                        </TabsTrigger>
-                                    </TabsList>
-                                </Tabs>
-                            </div>
-                        </div>
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-border/30 shrink-0">
+                    <div>
+                        <h2 className="text-[17px] font-semibold text-foreground tracking-[-0.02em]">
+                            Create Bucket
+                        </h2>
+                        <p className="text-[12px] text-muted-foreground mt-0.5">
+                            Step {stepIndex + 1} of {STEPS.length} — {currentStep}
+                        </p>
                     </div>
+                    <button
+                        onClick={resetAndClose}
+                        className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all cursor-pointer"
+                    >
+                        <X className="w-4 h-4" strokeWidth={1.5} />
+                    </button>
+                </div>
 
-                    {/* Main Content Area */}
-                    <div className="flex-1 flex flex-col bg-background/40 relative">
-                        <button
-                            onClick={() => onOpenChange(false)}
-                            className="absolute top-4 right-4 p-1.5 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-secondary/50 transition-all cursor-pointer z-20"
-                        >
-                            <X className="w-4 h-4" strokeWidth={2} />
-                        </button>
+                {/* Progress bar */}
+                <div className="flex gap-1.5 px-6 shrink-0">
+                    {STEPS.map((_, i) => {
+                        const activeColors = ['bg-indigo-500', 'bg-sky-500', 'bg-emerald-500'];
+                        return (
+                            <div
+                                key={i}
+                                className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= stepIndex ? activeColors[i] : 'bg-border/40'}`}
+                            />
+                        );
+                    })}
+                </div>
 
-                        <div className="flex-1 p-8 overflow-y-auto">
-                            <Tabs value={activeTab} className="h-full">
-                                <TabsContent value="name" className="mt-0 h-full flex flex-col justify-center space-y-6 focus-visible:outline-none">
-                                    <div className="space-y-1.5">
-                                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-4 border border-indigo-500/20 shadow-inner">
-                                            <Type className="w-5 h-5 text-indigo-400" strokeWidth={2} />
-                                        </div>
-                                        <h3 className="text-[18px] font-semibold text-foreground tracking-[-0.02em]">What is this bucket about?</h3>
-                                        <p className="text-[14px] text-muted-foreground">Give your new collection a clear, memorable name.</p>
-                                    </div>
-                                    <input
-                                        autoFocus
-                                        value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
-                                        onKeyDown={(e) => e.key === "Enter" && canProceed && handleTabChange("source")}
-                                        placeholder="E.g., Project Ideas, Research Logs..."
-                                        className="w-full h-12 px-4 rounded-xl bg-secondary/30 border border-border/50 text-[15px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring focus:border-border transition-all shadow-inner"
-                                    />
-                                </TabsContent>
-
-                                <TabsContent value="source" className="mt-0 h-full flex flex-col justify-center space-y-6 focus-visible:outline-none">
-                                    <div className="space-y-1.5">
-                                        <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center mb-4 border border-sky-500/20 shadow-inner">
-                                            <Globe className="w-5 h-5 text-sky-400" strokeWidth={2} />
-                                        </div>
-                                        <h3 className="text-[18px] font-semibold text-foreground tracking-[-0.02em] flex items-center gap-2">
-                                            Add a source link <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-secondary/60 text-muted-foreground border border-border/40 uppercase tracking-wider">Optional</span>
-                                        </h3>
-                                        <p className="text-[14px] text-muted-foreground">Attach a primary URL or website to this bucket.</p>
-                                    </div>
-                                    <div className="relative">
-                                        <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" strokeWidth={2} />
-                                        <input
-                                            value={link}
-                                            onChange={(e) => setLink(e.target.value)}
-                                            onKeyDown={(e) => e.key === "Enter" && handleTabChange("details")}
-                                            placeholder="https://"
-                                            className="w-full h-12 pl-11 pr-4 rounded-xl bg-secondary/30 border border-border/50 text-[15px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring focus:border-border transition-all shadow-inner"
-                                        />
-                                    </div>
-                                </TabsContent>
-
-                                <TabsContent value="details" className="mt-0 h-full flex flex-col focus-visible:outline-none">
-                                    <div className="space-y-1.5 mb-5 shrink-0">
-                                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4 border border-emerald-500/20 shadow-inner hidden md:flex">
-                                            <AlignLeft className="w-5 h-5 text-emerald-400" strokeWidth={2} />
-                                        </div>
-                                        <h3 className="text-[18px] font-semibold text-foreground tracking-[-0.02em] flex items-center gap-2">
-                                            Add details <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-secondary/60 text-muted-foreground border border-border/40 uppercase tracking-wider">Optional</span>
-                                        </h3>
-                                        <p className="text-[14px] text-muted-foreground">Jot down notes, context, or any other thoughts.</p>
-                                    </div>
-                                    <div className="flex-1 min-h-0 bg-secondary/20 rounded-xl border border-border/50 focus-within:ring-1 focus-within:ring-ring focus-within:border-border transition-all shadow-inner overflow-hidden">
-                                        <RichTextEditor content={description} onChange={setDescription} />
-                                    </div>
-                                </TabsContent>
-                            </Tabs>
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto px-6 py-6 min-h-0">
+                    {currentStep === "Name" && (
+                        <div className="space-y-5">
+                            <div className="space-y-1">
+                                <h3 className="text-[15px] font-medium text-foreground">What's this bucket about?</h3>
+                                <p className="text-[13px] text-muted-foreground">Give your new collection a clear, memorable name.</p>
+                            </div>
+                            <input
+                                autoFocus
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && canProceed && goNext()}
+                                placeholder="E.g., Project Ideas, Research Logs..."
+                                className="w-full h-11 px-4 rounded-lg bg-background border border-border/50 text-[15px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all shadow-sm"
+                            />
                         </div>
+                    )}
 
-                        {/* Footer area within main content */}
-                        <div className="px-8 py-5 border-t border-border/30 bg-muted/5 flex items-center justify-between shrink-0">
-                            <p className="text-[13px] text-muted-foreground/70 hidden sm:block font-medium">
-                                {activeTab === "name" && "Keep names short and descriptive."}
-                                {activeTab === "source" && "You can always edit this link later."}
-                                {activeTab === "details" && "Use formatting to structure your thoughts."}
-                            </p>
-                            <div className="flex items-center gap-3 ml-auto">
-                                <button
-                                    onClick={() => onOpenChange(false)}
-                                    className="px-4 py-2 text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary/80 transition-all cursor-pointer"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={saveBucket}
-                                    disabled={!canProceed || saving}
-                                    className="rounded-xl font-medium px-6 text-[13px] h-10 cursor-pointer bg-foreground text-background hover:bg-foreground/90 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2"
-                                >
-                                    {saving ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        "Create Bucket"
-                                    )}
-                                </button>
+                    {currentStep === "Source" && (
+                        <div className="space-y-5">
+                            <div className="space-y-1">
+                                <h3 className="text-[15px] font-medium text-foreground flex items-center gap-2">
+                                    Add a source link
+                                    <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-secondary/60 text-muted-foreground border border-border/30">Optional</span>
+                                </h3>
+                                <p className="text-[13px] text-muted-foreground">Attach a primary URL or website to this bucket.</p>
+                            </div>
+                            <div className="relative">
+                                <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" strokeWidth={1.5} />
+                                <input
+                                    autoFocus
+                                    value={link}
+                                    onChange={(e) => setLink(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && goNext()}
+                                    placeholder="https://"
+                                    className="w-full h-11 pl-11 pr-4 rounded-lg bg-background border border-border/50 text-[15px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500/40 transition-all shadow-sm"
+                                />
                             </div>
                         </div>
+                    )}
+
+                    {currentStep === "Details" && (
+                        <div className="space-y-5">
+                            <div className="space-y-1">
+                                <h3 className="text-[15px] font-medium text-foreground flex items-center gap-2">
+                                    Add details
+                                    <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-secondary/60 text-muted-foreground border border-border/30">Optional</span>
+                                </h3>
+                                <p className="text-[13px] text-muted-foreground">Jot down notes, context, or any other thoughts.</p>
+                            </div>
+                            <RichTextEditor content={description} onChange={setDescription} />
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 py-4 border-t border-border/30 flex items-center justify-between bg-muted/5 shrink-0">
+                    <button
+                        onClick={goBack}
+                        disabled={stepIndex === 0}
+                        className="h-9 px-4 flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-accent/50 transition-all cursor-pointer disabled:opacity-0 disabled:pointer-events-none"
+                    >
+                        <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2} />
+                        Back
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={resetAndClose}
+                            className="h-9 px-4 text-[13px] font-medium text-muted-foreground hover:text-foreground rounded-lg hover:bg-accent/50 transition-all cursor-pointer"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={goNext}
+                            disabled={(currentStep === "Name" && !canProceed) || saving}
+                            className="h-9 px-5 rounded-lg font-medium text-[13px] cursor-pointer bg-foreground text-background hover:bg-foreground/90 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm hover:-translate-y-px flex items-center gap-2"
+                        >
+                            {saving ? (
+                                <>
+                                    <div className="w-3.5 h-3.5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                                    Saving...
+                                </>
+                            ) : isLastStep ? (
+                                <>
+                                    <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
+                                    Create Bucket
+                                </>
+                            ) : (
+                                <>
+                                    Next
+                                    <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
+                                </>
+                            )}
+                        </button>
                     </div>
                 </div>
             </DialogContent>
