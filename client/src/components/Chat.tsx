@@ -134,7 +134,7 @@ export const Chat = ({ messages, setMessages, input, setInput, loading, setLoadi
             >
               {/* Logo */}
               <div className="flex justify-center mb-2">
-                <div className="w-14 h-14 bg-foreground rounded-2xl flex items-center justify-center text-background shadow-lg">
+                <div className="w-14 h-14 bg-foreground rounded-xl flex items-center justify-center text-background shadow-lg">
                   <Logo width={28} height={28} />
                 </div>
               </div>
@@ -200,7 +200,7 @@ export const Chat = ({ messages, setMessages, input, setInput, loading, setLoadi
                 className={`
                   max-w-[80%] text-[14px] leading-[1.65] relative
                   ${msg.role === "user"
-                    ? "bg-foreground text-background px-4 py-2.5 rounded-2xl rounded-br-sm shadow-sm"
+                    ? "bg-foreground text-background px-4 py-2.5 rounded-xl rounded-br-sm shadow-sm"
                     : "text-foreground pt-0.5"
                   }
                 `}

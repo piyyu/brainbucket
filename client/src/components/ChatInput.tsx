@@ -22,7 +22,7 @@ export const ChatInput = ({
     <InputGroup
       className={`
         w-full max-w-3xl mx-auto z-50
-        bg-secondary/30 backdrop-blur-sm border border-border/50 rounded-xl overflow-hidden items-end shadow-vercel
+        bg-secondary/30 backdrop-blur-sm border border-border/50 rounded-lg overflow-hidden items-end shadow-vercel
         hover:border-border transition-colors
       `}
     >
