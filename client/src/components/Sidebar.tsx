@@ -1,4 +1,4 @@
-import { History, User, LogOut, Settings, Grid3X3 } from "lucide-react";
+import { History, User, LogOut, Settings, Grid3X3, ChevronDown } from "lucide-react";
 import { Logo } from "./icons/Logo";
 import { AddBucket } from "./AddBucket";
 import { Buckets } from "./Buckets";
@@ -7,15 +7,18 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 interface SidebarProps {
-  isOpen?: boolean;
-  onClose?: () => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
+  isDesktopOpen?: boolean;
+  onDesktopToggle?: () => void;
 }
 
-export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
+export const Sidebar = ({ isMobileOpen, onMobileClose, isDesktopOpen = true, onDesktopToggle }: SidebarProps) => {
   const navigate = useNavigate();
 
   const Logout = () => {
@@ -25,80 +28,83 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
   return (
     <>
-      {/* Mobile Backdrop */}
-      {isOpen && (
+      {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
-          onClick={onClose}
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={onMobileClose}
         />
       )}
 
-      <aside className={`fixed left-0 top-0 h-screen w-20 md:w-24 bg-card border-r border-border/50 flex flex-col items-center py-6 z-50 transition-transform duration-300 md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-
-        <div className="mb-10 relative group cursor-pointer">
-          <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-          <div className="w-12 h-12 bg-primary flex items-center justify-center rounded-xl shadow-sm text-primary-foreground relative z-10 transition-transform group-hover:scale-105">
-            <Logo width={24} height={24} />
-          </div>
+      <aside
+        className={`fixed left-0 top-0 h-screen bg-background border-r border-border flex flex-col z-50 transition-all duration-200 ease-in-out
+          ${isMobileOpen ? 'translate-x-0 w-[260px]' : '-translate-x-full w-[260px]'}
+          ${isDesktopOpen ? 'md:translate-x-0 md:w-[260px]' : 'md:-translate-x-full md:w-0'}
+          overflow-hidden
+        `}
+      >
+        {/* Header */}
+        <div className="flex items-center h-14 px-4 border-b border-border w-[260px]">
+          <button
+            onClick={onDesktopToggle}
+            className="flex items-center gap-2.5 w-full text-left focus:outline-none group cursor-pointer"
+          >
+            <div className="w-7 h-7 bg-foreground rounded-[6px] flex items-center justify-center text-background">
+              <Logo width={16} height={16} />
+            </div>
+            <span className="font-semibold text-[14px] text-foreground tracking-[-0.01em]">BrainBucket</span>
+          </button>
         </div>
 
+        {/* Navigation */}
+        <div className="flex flex-col gap-0.5 px-2 pt-2 w-[260px] flex-1">
+          <AddBucket />
 
-        <div className="flex flex-col gap-6 w-full px-2 items-center">
-          <div className="relative group">
-            <AddBucket />
-          </div>
+          <div className="h-px bg-border mx-2 my-1.5" />
 
-          <div className="w-8 h-[1px] bg-border/50" />
-
-          <div className="flex flex-col gap-4">
+          <nav className="flex flex-col gap-0.5 w-full">
             <Buckets />
 
-            <button className="p-3 rounded-xl bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-all relative group shadow-sm flex items-center justify-center h-12 w-12 mx-auto">
-              <History className="w-5 h-5" />
-              <span className="absolute left-16 bg-popover border border-border text-popover-foreground text-sm font-medium px-3 py-1.5 rounded-lg shadow-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all whitespace-nowrap z-50 pointer-events-none">
-                History
-              </span>
+            <button className="w-full flex items-center gap-2.5 px-2.5 py-[7px] rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground text-[13px] font-medium transition-colors cursor-pointer">
+              <History className="w-4 h-4" strokeWidth={1.5} />
+              <span>History</span>
             </button>
 
-            <button className="p-3 rounded-xl bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-all relative group shadow-sm flex items-center justify-center h-12 w-12 mx-auto">
-              <Grid3X3 className="w-5 h-5" />
-              <span className="absolute left-16 bg-popover border border-border text-popover-foreground text-sm font-medium px-3 py-1.5 rounded-lg shadow-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all whitespace-nowrap z-50 pointer-events-none">
-                Integrations
-              </span>
+            <button className="w-full flex items-center gap-2.5 px-2.5 py-[7px] rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground text-[13px] font-medium transition-colors cursor-pointer">
+              <Grid3X3 className="w-4 h-4" strokeWidth={1.5} />
+              <span>Integrations</span>
             </button>
-          </div>
-
+          </nav>
         </div>
 
-
-        <div className="mt-auto flex flex-col gap-6 items-center w-full">
-          <div className="w-8 h-[1px] bg-border/50" />
-
+        {/* Footer */}
+        <div className="px-2 pb-3 w-[260px]">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="p-3 rounded-full bg-secondary border border-transparent text-secondary-foreground hover:bg-secondary/80 transition-all shadow-sm">
-                <User className="w-5 h-5" />
+              <button className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent text-foreground text-[13px] font-medium transition-colors cursor-pointer">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-[10px] font-semibold shrink-0">
+                  U
+                </div>
+                <span className="flex-1 text-left truncate">My Account</span>
+                <ChevronDown className="w-3 h-3 text-muted-foreground" strokeWidth={1.5} />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="ml-12 w-56 bg-popover border-border text-popover-foreground rounded-xl shadow-lg">
-              <DropdownMenuItem className="focus:bg-secondary focus:text-secondary-foreground rounded-lg cursor-pointer">
-                <User className="mr-2 h-4 w-4" /> Profile
+            <DropdownMenuContent
+              align="start"
+              side="top"
+              className="w-[calc(260px-1rem)] ml-0 bg-popover border border-border shadow-vercel rounded-lg p-1"
+            >
+              <DropdownMenuItem className="rounded-md cursor-pointer py-1.5 px-2 text-[13px] gap-2">
+                <User className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} /> Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-secondary focus:text-secondary-foreground rounded-lg cursor-pointer">
-                <Settings className="mr-2 h-4 w-4" /> Settings
+              <DropdownMenuItem className="rounded-md cursor-pointer py-1.5 px-2 text-[13px] gap-2">
+                <Settings className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} /> Settings
               </DropdownMenuItem>
-              <div className="h-[1px] bg-border/50 my-1" />
-              <DropdownMenuItem onClick={Logout} className="text-destructive focus:bg-destructive/10 focus:text-destructive rounded-lg cursor-pointer flex items-center">
-                <LogOut className="mr-2 h-4 w-4" /> Logout
+              <DropdownMenuSeparator className="bg-border" />
+              <DropdownMenuItem onClick={Logout} className="text-red-500 focus:text-red-500 rounded-md cursor-pointer py-1.5 px-2 text-[13px] gap-2">
+                <LogOut className="h-4 w-4" strokeWidth={1.5} /> Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <div className="flex flex-col gap-1.5 items-center pb-4">
-            <div className="flex items-center gap-1.5 bg-secondary/50 px-2 py-1 rounded-full">
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-            </div>
-          </div>
         </div>
       </aside>
     </>

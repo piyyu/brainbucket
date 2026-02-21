@@ -14,15 +14,15 @@ export default function FeatureCard({
   return (
     <div
       className={`
-        bg-neutral-900/50 border border-neutral-800 rounded-xl p-6
-        flex flex-col gap-4
+        bg-background border border-border rounded-lg p-6
+        flex flex-col gap-4 hover:border-foreground/20 transition-colors
         ${className}
       `}
     >
       <div className="flex-1">{children}</div>
       <div>
-        <h3 className="text-white text-lg font-medium mb-1">{title}</h3>
-        <p className="text-neutral-400 text-sm">{description}</p>
+        <h3 className="text-foreground text-[16px] font-semibold mb-1">{title}</h3>
+        <p className="text-muted-foreground text-[13px] leading-[1.5]">{description}</p>
       </div>
     </div>
   );

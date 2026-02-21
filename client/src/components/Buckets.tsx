@@ -12,8 +12,8 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import { FolderHeart } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { FolderHeart, Search } from "lucide-react"
+
 import axios from "axios"
 import { useState } from "react"
 
@@ -47,51 +47,48 @@ export function Buckets() {
     <Dialog onOpenChange={(open) => {
       open && fetchBuckets();
     }}>
-      <DialogTrigger className="rounded">
-        <Button
-          variant="default"
-          size="icon"
-          className="p-3 rounded-xl bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-all relative group shadow-sm h-12 w-12"
-        >
-          <FolderHeart className="h-5 w-5" />
-        </Button>
+      <DialogTrigger asChild>
+        <button className="w-full flex items-center gap-2.5 px-2.5 py-[7px] rounded-md bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground text-[13px] font-medium transition-colors outline-none cursor-pointer">
+          <FolderHeart className="w-4 h-4" strokeWidth={1.5} />
+          <span>Explore Buckets</span>
+        </button>
       </DialogTrigger>
 
-      <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-2xl">
-        <div className="relative bg-card border border-border/50 rounded-2xl shadow-xl overflow-hidden">
+      <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-xl">
+        <div className="relative bg-popover border border-border rounded-lg shadow-vercel overflow-hidden">
 
           <Command className="bg-transparent rounded-none border-none">
-            <div className="flex items-center px-4 border-b border-border/30">
-              <FolderHeart className="w-4 h-4 text-muted-foreground mr-3" />
+            <div className="flex items-center gap-2 px-3 border-b border-border">
+              <Search className="w-4 h-4 text-muted-foreground shrink-0" strokeWidth={1.5} />
               <CommandInput
-                placeholder="Search Knowledge Base..."
-                className="text-base text-foreground placeholder:text-muted-foreground h-16"
+                placeholder="Search buckets..."
+                className="text-[14px] text-foreground placeholder:text-muted-foreground h-11 border-none focus:ring-0 px-0"
               />
             </div>
 
-            <CommandList className="max-h-[400px] overflow-y-auto p-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              <CommandEmpty className="py-12 text-center">
-                <div className="text-foreground font-medium mb-1">No Results found</div>
-                <div className="text-sm text-muted-foreground">We couldn't find anything matching your search.</div>
+            <CommandList className="max-h-[320px] overflow-y-auto p-1.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <CommandEmpty className="py-8 text-center">
+                <div className="text-foreground font-medium text-[14px] mb-0.5">No results found</div>
+                <div className="text-[13px] text-muted-foreground">Try a different search term.</div>
               </CommandEmpty>
 
               {!loading && (
-                <CommandGroup heading={<span className="text-xs text-muted-foreground font-semibold pl-2 mb-2 block uppercase tracking-wider">Available Buckets</span>}>
+                <CommandGroup heading={<span className="text-[11px] text-muted-foreground font-medium px-1.5 mb-1 block uppercase tracking-wider">Buckets</span>}>
                   {buckets.map((note) => (
                     <CommandItem
                       key={note._id}
                       value={note.title}
                       onSelect={() => console.log("open note:", note._id)}
-                      className="group relative flex items-center justify-between p-3 mb-1 rounded-xl aria-selected:bg-secondary aria-selected:text-foreground text-muted-foreground transition-colors cursor-pointer"
+                      className="group relative flex items-center justify-between px-2.5 py-2 rounded-md aria-selected:bg-accent aria-selected:text-accent-foreground text-foreground transition-colors cursor-pointer text-[13px]"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="w-1.5 h-1.5 bg-border group-aria-selected:bg-primary rounded-full transition-colors" />
+                      <div className="flex items-center gap-3">
+                        <div className="w-1.5 h-1.5 bg-border group-aria-selected:bg-foreground rounded-full transition-colors shrink-0" />
                         <div>
-                          <div className="font-medium text-base text-foreground transition-colors">
+                          <div className="font-medium text-[14px]">
                             {note.title}
                           </div>
                           {note.link && (
-                            <div className="text-sm text-muted-foreground truncate max-w-[300px]">
+                            <div className="text-[12px] text-muted-foreground truncate max-w-[280px]">
                               {note.link}
                             </div>
                           )}
@@ -99,7 +96,7 @@ export function Buckets() {
                       </div>
 
                       <div className="opacity-0 group-aria-selected:opacity-100 transition-opacity">
-                        <span className="text-xs font-semibold bg-background text-foreground px-3 py-1.5 rounded-full shadow-sm">
+                        <span className="text-[11px] font-medium bg-background border border-border text-foreground px-2 py-1 rounded">
                           Open
                         </span>
                       </div>
@@ -109,9 +106,9 @@ export function Buckets() {
               )}
             </CommandList>
 
-            <div className="px-6 py-3 border-t border-border/30 bg-secondary/30 flex justify-between items-center text-xs font-medium text-muted-foreground">
-              <span>Total Items: {buckets.length}</span>
-              <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-green-500 rounded-full" /> Connected</span>
+            <div className="px-3 py-2 border-t border-border flex justify-between items-center text-[11px] text-muted-foreground">
+              <span>{buckets.length} items</span>
+              <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 bg-green-500 rounded-full" /> Connected</span>
             </div>
 
           </Command>
