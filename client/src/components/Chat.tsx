@@ -181,7 +181,7 @@ export const Chat = ({ messages, setMessages, input, setInput, loading, setLoadi
       ) : (
         <>
           {/* Messages — the only scrolling region */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto relative z-10">
+          <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto relative z-10">
             <div className="w-full max-w-3xl mx-auto px-4 pt-8 pb-6 flex flex-col min-h-full">
               {/* Messages */}
               {messages.map((msg, idx) => (
