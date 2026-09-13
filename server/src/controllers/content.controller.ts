@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import Content from "../models/content.model";
 import { generateEmbedding } from "../utils/embedding.js";
 import { askGroq } from "../utils/groq";
-import Groq from "groq-sdk";
 
 function cosineSimilarity(a: number[], b: number[]): number {
   let dot = 0, magA = 0, magB = 0;
@@ -173,9 +172,11 @@ Respond naturally, continuing the conversation.
       history: userChats[userId],
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Ask error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    const message = error?.error?.message || error?.message || "Internal server error";
+    const code = error?.error?.code || error?.code;
+    return res.status(500).json({ error: message, code });
   }
 };
 
