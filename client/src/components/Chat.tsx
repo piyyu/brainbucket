@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ChatInput } from "./ChatInput";
+import { AssistantMarkdown } from "./AssistantMarkdown";
 import { Copy, RefreshCw, Sparkles, Lightbulb, Search, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "./icons/Logo";
@@ -207,7 +208,11 @@ export const Chat = ({ messages, setMessages, input, setInput, loading, setLoadi
                   }
                 `}
               >
-                {msg.content}
+                {msg.role === "assistant" ? (
+                  <AssistantMarkdown content={msg.content} />
+                ) : (
+                  <span className="whitespace-pre-wrap break-words">{msg.content}</span>
+                )}
 
                 {msg.role === "assistant" && (
                   <div className="mt-3 flex gap-1">

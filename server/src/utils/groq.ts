@@ -63,6 +63,13 @@ If the Memory Notes are relevant to the user's message:
 - Simply integrate the info into your explanation.
 
 If they are not relevant, ignore them.
+
+Formatting rules (the UI renders markdown):
+- Use short paragraphs separated by blank lines.
+- Use bullet or numbered lists for multi-item answers.
+- Use fenced code blocks with a language tag (\`\`\`js, \`\`\`python, etc.) for all code.
+- Use **bold** sparingly for key terms, \`inline code\` for file names, symbols, and short snippets.
+- Keep answers focused and scannable.
         `.trim()
           },
 
