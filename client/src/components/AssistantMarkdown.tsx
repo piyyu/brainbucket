@@ -1,9 +1,10 @@
 import { Children, isValidElement, useState, type ReactElement, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 import { Check, Copy } from "lucide-react";
 
-function CodeBlock({ lang, text }: { lang: string; text: string }) {
+function CodeBlock({ lang, text, children }: { lang: string; text: string; children: ReactNode }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -31,19 +32,27 @@ function CodeBlock({ lang, text }: { lang: string; text: string }) {
         </button>
       </div>
       <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed">
-        <code className="font-mono text-foreground bg-transparent p-0">{text}</code>
+        <code className="hljs font-mono bg-transparent p-0">{children}</code>
       </pre>
     </div>
   );
+}
+
+function extractText(node: ReactNode): string {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractText).join("");
+  if (isValidElement<{ children?: ReactNode }>(node)) return extractText(node.props.children);
+  return "";
 }
 
 function ThemedPre({ children }: { children?: ReactNode }) {
   const codeEl = Children.toArray(children)[0] as ReactElement<{ className?: string; children?: ReactNode }> | undefined;
   const className = isValidElement(codeEl) ? codeEl.props.className || "" : "";
   const lang = /language-([\w+-]+)/.exec(className)?.[1] || "code";
-  const raw = isValidElement(codeEl) ? codeEl.props.children : "";
-  const text = String(Array.isArray(raw) ? raw.join("") : raw ?? "").replace(/\n$/, "");
-  return <CodeBlock lang={lang} text={text} />;
+  const codeChildren = isValidElement(codeEl) ? codeEl.props.children : children;
+  const text = extractText(codeChildren).replace(/\n$/, "");
+  return <CodeBlock lang={lang} text={text}>{codeChildren}</CodeBlock>;
 }
 
 export const AssistantMarkdown = ({ content }: { content: string }) => {
@@ -51,6 +60,7 @@ export const AssistantMarkdown = ({ content }: { content: string }) => {
     <div className="markdown-body text-[14px] leading-[1.7] text-foreground break-words">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeHighlight]}
         components={{
           p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
           h1: ({ children }) => (
@@ -83,11 +93,15 @@ export const AssistantMarkdown = ({ content }: { content: string }) => {
               {children}
             </blockquote>
           ),
-          code: ({ children, className }) => (
-            <code className={`font-mono text-[13px] bg-secondary/60 border border-border/50 rounded px-1.5 py-0.5 ${className || ""}`}>
-              {children}
-            </code>
-          ),
+          code: ({ children, className }) => {
+            const isBlock = /language-[\w+-]+/.test(className || "");
+            if (isBlock) return <code className={className}>{children}</code>;
+            return (
+              <code className={`font-mono text-[13px] bg-secondary/60 border border-border/50 rounded px-1.5 py-0.5 ${className || ""}`}>
+                {children}
+              </code>
+            );
+          },
           pre: ThemedPre,
           table: ({ children }) => (
             <div className="my-4 overflow-x-auto rounded-lg border border-border/50">
